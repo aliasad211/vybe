@@ -1,0 +1,17 @@
+# Node Modules
+node_modules/
+
+# Environment Variables
+.env
+
+# Logs
+logs
+*.log
+
+# Build Folders
+dist/
+build/
+
+# OS Files
+.DS_Store
+Thumbs.db
