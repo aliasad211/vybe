@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 
 //signup function
-export const signup=async(req,res)=>{
+export const signUp=async(req,res)=>{
     try{
        const {name,email,password,userName} =req.body;
        const findByEmail = await User.findOne({email});
