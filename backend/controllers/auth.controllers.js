@@ -2,6 +2,8 @@ import User from "../models/user.model.js";
 import genToken from "../config/token.js";
 import bcrypt from "bcryptjs";
 
+
+//signup function
 export const signup=async(req,res)=>{
     try{
        const {name,email,password,userName} =req.body;
@@ -44,7 +46,7 @@ export const signup=async(req,res)=>{
     }
 }
 
-
+//signin function
 export const signIn=async(req,res)=>{
     try{
        const {password,userName} =req.body;
@@ -73,5 +75,21 @@ export const signIn=async(req,res)=>{
 
     }catch(error){
       return res.status(500).json({message:`signin error ${error}`});
+    }
+}
+
+//signout function
+export const signOut = async (req,res)=>{
+    try{
+      res.clearCookie("accessToken",{
+        httpOnly:true,
+        maxAge:10*365*24*60*60*1000,
+        secure:false,
+        sameSite:"Strict"
+       })
+
+       return res.status(200).json({message:"sign out successfully"})
+    }catch(error){
+      return res.status(500).json(`sign out error ${error}`);
     }
 }
