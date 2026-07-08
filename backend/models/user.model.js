@@ -15,7 +15,7 @@ const userSchema=new mongoose.Schema({
         required:true,
         unique:true
     },
-    Password:{
+    password:{
         type:String,
         required:true
     },
@@ -23,12 +23,12 @@ const userSchema=new mongoose.Schema({
         type:String,
     },
     followers:[
-        {types:mongoose.Schema.Types.ObjectId,
+        {type:mongoose.Schema.Types.ObjectId,
          ref:"User"
         }
     ],
     following:[
-        {types:mongoose.Schema.Types.ObjectId,
+        {type:mongoose.Schema.Types.ObjectId,
          ref:"User"
         }
     ],
