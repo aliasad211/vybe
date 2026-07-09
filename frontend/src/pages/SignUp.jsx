@@ -3,6 +3,7 @@ import logo from "../assets/logo.png";
 import logo2 from "../assets/logo2.png";
 import { IoIosEye } from "react-icons/io";
 import { IoIosEyeOff } from "react-icons/io";
+import { ClipLoader } from "react-spinners";
 import axios from 'axios';
 import { useState } from 'react';
 import { use } from 'react';
@@ -20,17 +21,20 @@ function SignUp() {
    const [userName, setUserName] = useState("");
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
-
+  const [loading, setLoading] = useState(false);
    const handleSignup = async()=>{
     try{
+     setLoading(true)
      const response = await axios.post(
         `${serverUrl}/api/auth/signup`,
         {name, userName, email, password},
         {withCredentials:true}
     )
     console.log(response.data);
+    setLoading(false)
     }catch(error){
-       console.log(error.response.data);
+       console.log(error);
+       setLoading(false);
     }
    }
 
@@ -95,8 +99,10 @@ function SignUp() {
                 </div>
 
                 <button className='w-[70%] px-5 py-2.5 bg-black text-white font-semibold h-12.5 cursor-pointer rounded-2xl mt-7.5'
-                onClick={handleSignup}
-                >Sign Up</button>
+                onClick={handleSignup} disabled={loading}
+                >
+                {loading ? <ClipLoader size={30} color='white'/> : "Sign Up"}
+                </button>
 
                 <p className='cursor-pointer text-gray-800'>Already Have an account ? <span className='border-b-2 border-b-black pb-0.5 text-black'>Sign In</span></p>
 
