@@ -3,8 +3,10 @@ import logo from "../assets/logo.png";
 import logo2 from "../assets/logo2.png";
 import { IoIosEye } from "react-icons/io";
 import { IoIosEyeOff } from "react-icons/io";
+import axios from 'axios';
 import { useState } from 'react';
 import { use } from 'react';
+import { serverUrl } from '../App';
 
 function SignUp() {
    const [inputClicked, setInputClicked] = useState({
@@ -14,6 +16,23 @@ function SignUp() {
     password:false
    });
    const [showPassword, setShowPassword] = useState(false);
+   const [name, setName] = useState("");
+   const [userName, setUserName] = useState("");
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+
+   const handleSignup = async()=>{
+    try{
+     const response = await axios.post(
+        `${serverUrl}/api/auth/signup`,
+        {name, userName, email, password},
+        {withCredentials:true}
+    )
+    console.log(response.data);
+    }catch(error){
+       console.log(error.response.data);
+    }
+   }
 
   return (
     <div className='w-full h-screen bg-linear-to-b from-black to-gray-900 flex flex-col justify-center items-center'>
@@ -32,7 +51,7 @@ function SignUp() {
                    className={`text-gray-700 absolute left-5 p-1.25 bg-white text-3.75 ${inputClicked.name ? "-top-4": ""}`}>
                     Enter Your Name
                     </label>
-                    <input type='text' id='name' className='w-full h-full rounded-2xl px-5 outline-none border-0' required/>
+                    <input type='text' id='name' className='w-full h-full rounded-2xl px-5 outline-none border-0' onChange={(e)=>setName(e.target.value)} value={name} required/>
                    
                </div>
 
@@ -44,7 +63,7 @@ function SignUp() {
                    className={`text-gray-700 absolute left-5 p-1.25 bg-white text-3.75 ${inputClicked.userName ? "-top-4": ""}`}>
                     Enter User Name
                     </label>
-                    <input type='text' id='userName' className='w-full h-full rounded-2xl px-5 outline-none border-0' required/>
+                    <input type='text' id='userName' className='w-full h-full rounded-2xl px-5 outline-none border-0' onChange={(e)=>setUserName(e.target.value)} value={userName} required/>
                    
                </div>
 
@@ -56,7 +75,7 @@ function SignUp() {
                    className={`text-gray-700 absolute left-5 p-1.25 bg-white text-3.75 ${inputClicked.email ? "-top-4": ""}`}>
                     Enter Your Email
                     </label>
-                    <input type='text' id='email' className='w-full h-full rounded-2xl px-5 outline-none border-0' required/>
+                    <input type='text' id='email' className='w-full h-full rounded-2xl px-5 outline-none border-0' onChange={(e)=>setEmail(e.target.value)} value={email} required/>
                    
                </div>
 
@@ -68,14 +87,16 @@ function SignUp() {
                    className={`text-gray-700 absolute left-5 p-1.25 bg-white text-3.75 ${inputClicked.password ? "-top-4": ""}`}>
                     Enter Password
                     </label>
-                    <input type={showPassword ? "text" : "password"} id='password' className='w-full h-full rounded-2xl px-5 outline-none border-0' required/>
+                    <input type={showPassword ? "text" : "password"} id='password' className='w-full h-full rounded-2xl px-5 outline-none border-0' onChange={(e)=>setPassword(e.target.value)} value={password} required/>
                    {!showPassword ? 
                    <IoIosEye className='absolute cursor-pointer right-5 w-6 h-6' onClick={()=>setShowPassword(true)} />
                    : <IoIosEyeOff className='absolute cursor-pointer right-5 w-6 h-6' onClick={()=>setShowPassword(false)}/>
                     }
                 </div>
 
-                <button className='w-[70%] px-5 py-2.5 bg-black text-white font-semibold h-12.5 cursor-pointer rounded-2xl mt-7.5'>Sign Up</button>
+                <button className='w-[70%] px-5 py-2.5 bg-black text-white font-semibold h-12.5 cursor-pointer rounded-2xl mt-7.5'
+                onClick={handleSignup}
+                >Sign Up</button>
 
                 <p className='cursor-pointer text-gray-800'>Already Have an account ? <span className='border-b-2 border-b-black pb-0.5 text-black'>Sign In</span></p>
 
