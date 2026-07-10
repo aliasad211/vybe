@@ -74,7 +74,7 @@ function SignIn() {
                         }
                     </div>
                     <div className="w-[90%] px-5 cursor-pointer text-right">
-                        Forgot Password?
+                        <Link to="/forgot-password">Forgot Password?</Link>
                     </div>
 
                     <button className='w-[70%] px-5 py-2.5 bg-black text-white font-semibold h-12.5 cursor-pointer rounded-2xl mt-1'
