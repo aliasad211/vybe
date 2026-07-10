@@ -50,12 +50,21 @@ const userSchema=new mongoose.Schema({
             ref:"Loop"
         }
     ],
-    story:[
+    story:
         {
             type:mongoose.Schema.Types.ObjectId,
             ref:"Story"
-        }
-    ],
+        },
+    resetOtp:{
+        type:String
+    },
+    otpExpires:{
+        type:Date
+    },
+    isOtpVerified:{
+        type:Boolean,
+        default:false
+    }
 },{timestamps:true})
 
 const User = mongoose.model("User", userSchema);
