@@ -16,14 +16,15 @@ function SignIn() {
         password: false
     });
     const [showPassword, setShowPassword] = useState(false);
-
+    const [err, setErr] = useState("");
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
     const handleSignIn = async () => {
+       setLoading(true);
+       setErr("");
         try {
-            setLoading(true)
             const response = await axios.post(
                 `${serverUrl}/api/auth/signin`,
                 { userName, password },
@@ -32,6 +33,7 @@ function SignIn() {
             console.log(response.data);
             setLoading(false)
         } catch (error) {
+            setErr(error.response?.data?.message);
             console.log(error.response.data);
             setLoading(false);
         }
@@ -76,6 +78,8 @@ function SignIn() {
                     <div className="w-[90%] px-5 cursor-pointer text-right">
                         <Link to="/forgot-password">Forgot Password?</Link>
                     </div>
+
+                    {err && <p className='text-red-500'>{err}</p>}
 
                     <button className='w-[70%] px-5 py-2.5 bg-black text-white font-semibold h-12.5 cursor-pointer rounded-2xl mt-1'
                         onClick={handleSignIn} disabled={loading}

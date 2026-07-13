@@ -22,10 +22,13 @@ function SignUp() {
    const [userName, setUserName] = useState("");
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
+   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+
    const handleSignup = async()=>{
+    setLoading(true);
+    setErr("");
     try{
-     setLoading(true)
      const response = await axios.post(
         `${serverUrl}/api/auth/signup`,
         {name, userName, email, password},
@@ -34,6 +37,7 @@ function SignUp() {
     console.log(response.data);
     setLoading(false)
     }catch(error){
+       setErr(error.response?.data?.message);
        console.log(error);
        setLoading(false);
     }
@@ -98,6 +102,7 @@ function SignUp() {
                    : <IoIosEyeOff className='absolute cursor-pointer right-5 w-6 h-6' onClick={()=>setShowPassword(false)}/>
                     }
                 </div>
+                {err && <p className='text-red-500'>{err}</p>}
 
                 <button className='w-[70%] px-5 py-2.5 bg-black text-white font-semibold h-12.5 cursor-pointer rounded-2xl mt-7.5'
                 onClick={handleSignup} disabled={loading}
