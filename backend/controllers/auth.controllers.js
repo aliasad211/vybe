@@ -57,7 +57,7 @@ export const signIn=async(req,res)=>{
         return res.status(400).json({message:"user not found!"});
        }
        
-       const isMatch = bcrypt.compare(password, user.password);
+       const isMatch = await bcrypt.compare(password, user.password);
        
        if(!isMatch){
         return res.status(400).json({message:"Incorrect Password"});
@@ -99,13 +99,13 @@ export const signOut = async (req,res)=>{
 export const sendOtp = async(req,res)=>{
     try{
        const {email} = req.body;
-       const user = User.findOne({email});
+       const user = await User.findOne({email});
        if(!user){
          return res.status(400).json({message:"User Not Found!"});
        }
        const otp = Math.floor(100000 + Math.random() * 900000).toString();
        user.resetOtp = otp;
-       user.otpExpires = new Date() + 5*60*1000;
+       user.otpExpires = Date.now() + 5 * 60 * 1000;
        user.isOtpVerified = false;
 
        await user.save();
@@ -119,10 +119,10 @@ export const sendOtp = async(req,res)=>{
 }
 
 //verify otp
-export const verifyOtp = async()=>{
+export const verifyOtp = async(req,res)=>{
     try{
       const {email,otp} = req.body;
-      const user = User.findOne({email});
+      const user = await User.findOne({email});
 
       if(!user || user.resetOtp != otp || user.otpExpires < Date.now()){
         return res.status(400).json({message:"Invalid or Expired OTP"});
@@ -144,7 +144,7 @@ export const verifyOtp = async()=>{
 export const resetPassword = async (req,res)=>{
     try{
        const {email, password} = req.body;
-       const user = User.findOne({email});
+       const user = await User.findOne({email});
 
        if(!user || !user.isOtpVerified){
         return res.status(400).json({message:"otp verification required"});
