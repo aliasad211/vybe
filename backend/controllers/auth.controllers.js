@@ -117,3 +117,25 @@ export const sendOtp = async(req,res)=>{
      return res.status(500).json({message:`Send OTP Error ${error}`});
     }
 }
+
+//verify otp
+export const verifyOtp = async()=>{
+    try{
+      const {email,otp} = req.body;
+      const user = User.findOne({email});
+
+      if(!user || user.resetOtp != otp || user.otpExpires < Date.now()){
+        return res.status(400).json({message:"Invalid or Expired OTP"});
+      }
+
+      user.isOtpVerified=true;
+      user.resetOtp=undefined;
+      user.otpExpires=undefined;
+
+      await user.save();
+
+      return res.status(200).json({message:"OTP Verified"});
+    }catch(error){
+        return res.status(500).json({message:`verify OTP Error ${error}`});
+    }
+}
