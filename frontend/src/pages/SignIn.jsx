@@ -33,12 +33,12 @@ function SignIn() {
                 { userName, password },
                 { withCredentials: true }
             )
-            setUserData(dispatch(response.data));
+            dispatch(setUserData(response.data));
             console.log(response.data);
             setLoading(false)
         } catch (error) {
             setErr(error.response?.data?.message);
-            console.log(error.response.data);
+            console.log(error.response?.data?.message);
             setLoading(false);
         }
     }
