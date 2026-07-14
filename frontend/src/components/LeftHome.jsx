@@ -26,12 +26,12 @@ function LeftHome() {
                <FaRegHeart  className='text-white w-6 h-6'/>
             </div>
         </div>
-        <div className='flex items-center w-full px-5 justify-between gap-2.5'>
+        <div className='flex items-center w-full border-b-2 border-gray-600 py-3 px-5 justify-between gap-2.5'>
             <div className='flex justify-center gap-2.5'>
-           <div className='w-17 h-17 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
+           <div className='w-16 h-16 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
              <img src={userData.profileImage || dp} className='w-full h-full object-cover'/>
            </div>
-           <div>
+           <div className='pt-2'>
             <div className='text-[18px] text-gray-300 font-semibold'>@{userData.userName}</div>
             <div className='text-[15px] text-gray-400 font-semibold'>{userData.name}</div>
            </div>
