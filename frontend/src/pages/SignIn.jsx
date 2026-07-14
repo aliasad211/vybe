@@ -9,6 +9,8 @@ import axios from 'axios';
 import { useState } from 'react';
 import { use } from 'react';
 import { serverUrl } from '../App';
+import { useDispatch } from 'react-redux';
+import { setUserData } from '../redux/userSlice';
 
 function SignIn() {
     const [inputClicked, setInputClicked] = useState({
@@ -20,6 +22,7 @@ function SignIn() {
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
 
     const handleSignIn = async () => {
        setLoading(true);
@@ -30,6 +33,7 @@ function SignIn() {
                 { userName, password },
                 { withCredentials: true }
             )
+            setUserData(dispatch(response.data));
             console.log(response.data);
             setLoading(false)
         } catch (error) {
