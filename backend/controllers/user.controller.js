@@ -1,3 +1,4 @@
+import uploadOnCloudinary from "../config/cloudinary.js";
 import User from "../models/user.model.js";
 
 const getCurrentUser = async(req,res)=>{
@@ -29,4 +30,36 @@ export const suggestedUsers = async(req,res)=>{
     }catch(error){
       return res.status(500).json({message:`get suggested user error ${error}`});
     }
+}
+
+export const editProfile = async(req,res)=>{
+  try{
+   const {name, userName, bio, profession, gender} = req.body;
+   const user = await User.findById(req.userId).select("-password");
+   if(!user){
+    return res.status(400).json({message:"user not found"});
+   }
+   const sameUserWithUserName = await User.findOne({userName}).select("-password");
+   if(sameUserWithUserName && sameUserWithUserName._id !== req.userId){
+    return res.status(400).json({message:"userName already exist"});
+   }
+
+   let profileImage;
+   if(req.file){
+    profileImage = await uploadOnCloudinary(req.file.path)
+   }
+
+   user.name = name
+   user.userName = userName
+   user.profileImage = profileImage
+   user.bio = bio
+   user.profession = profession
+   user.gender = gender
+
+   await user.save()
+
+   return res.status(200).json({message:"Profile edit successfully"});
+  }catch(error){
+   return res.status(500).json({message:`edit profile error ${error}`})
+  }
 }
