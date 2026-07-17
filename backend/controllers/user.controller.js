@@ -40,7 +40,7 @@ export const editProfile = async(req,res)=>{
     return res.status(400).json({message:"user not found"});
    }
    const sameUserWithUserName = await User.findOne({userName}).select("-password");
-   if(sameUserWithUserName && sameUserWithUserName._id !== req.userId){
+   if(sameUserWithUserName && sameUserWithUserName._id.toString() !== req.userId){
     return res.status(400).json({message:"userName already exist"});
    }
 
@@ -61,5 +61,21 @@ export const editProfile = async(req,res)=>{
    return res.status(200).json({message:"Profile edit successfully"});
   }catch(error){
    return res.status(500).json({message:`edit profile error ${error}`})
+  }
+}
+
+export const getProfile = async(req,res)=>{
+  try{
+    const userName = req.params.userName;
+    const user = await User.findOne({userName}).select("password");
+
+    if(!user){
+      return res.status(400).json({message:"user not found"});
+    }
+
+    return res.status(200).json(user);
+
+  }catch(error){
+    return res.status(500).json({message:`get profile error ${error}`})
   }
 }
