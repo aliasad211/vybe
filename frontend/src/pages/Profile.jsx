@@ -12,7 +12,8 @@ function Profile() {
     const {profileData} = useSelector(state=>state.user);
     const handleProfile=async()=>{
       try{
-       const response = await axios.get(`${serverUrl}/api/user/getProgile/${userName}`,{withCredentials:true});
+       const response = await axios.get(`${serverUrl}/api/user/getProfile/${userName}`,{withCredentials:true});
+       console.log("this is response data:",response.data);
        dispatch(setProfileData(response.data));
     }catch(error){
         console.log(error);
@@ -25,7 +26,7 @@ function Profile() {
     
   return (
     <div>
-      profileData?.name
+      {profileData?.name}
     </div>
   )
 }

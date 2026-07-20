@@ -67,7 +67,7 @@ export const editProfile = async(req,res)=>{
 export const getProfile = async(req,res)=>{
   try{
     const userName = req.params.userName;
-    const user = await User.findOne({userName}).select("password");
+    const user = await User.findOne({userName}).select("-password");
 
     if(!user){
       return res.status(400).json({message:"user not found"});
