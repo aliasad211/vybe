@@ -72,8 +72,22 @@ export const like = async (req, res) => {
 //comment controller
 export const comment = async (req, res) => {
     try {
+       const {message} = req.body;
+       const postId = req.params.postId;
+       const post = await Post.findById(postId)
+        if (!post) {
+            return res.status(400).json({ message: "post not found" });
+        }
+        post.comments.push({
+            author:req.userId,
+            message:message
+        })
 
+        await post.save();
+        post.populate("author", "name userName profileImage"),
+        post.populate("comments.author")
+        return res.status(200).json(post);
     } catch (error) {
-
+     return res.status(500).json({ message: error.message });
     }
 }
