@@ -64,7 +64,7 @@ function Profile() {
 
             <div className='w-full h-20 flex items-center justify-center gap-10 md:gap-15 px-[20%] text-white'>
                 <div>
-                    <div className='text-white font-semibold text-[22px] md:text-[30px]'>{profileData?.posts.length}</div>
+                    <div className='text-white font-semibold text-[22px] md:text-[30px]'>{profileData?.posts?.length}</div>
                     <div className='text-[18px] md:text-[22px] text-gray-300'>Posts</div>
                 </div>
                 <div>
@@ -81,7 +81,7 @@ function Profile() {
                             </div>
                         </div>
                         <div className='text-white font-semibold text-[22px] md:text-[30px]'>
-                            {profileData?.followers.length}
+                            {profileData?.followers?.length}
                         </div>
                     </div>
                     <div className='text-[18px] md:text-[22px] text-gray-300'>Followers</div>
@@ -100,7 +100,7 @@ function Profile() {
                             </div>
                         </div>
                         <div className='text-white font-semibold text-[22px] md:text-[30px]'>
-                            {profileData?.following.length}
+                            {profileData?.following?.length}
                         </div>
                     </div>
                     <div className='text-[18px] md:text-[22px] text-gray-300'>Following</div>

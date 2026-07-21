@@ -58,7 +58,10 @@ export const editProfile = async(req,res)=>{
 
    await user.save()
 
-   return res.status(200).json({message:"Profile edit successfully"});
+   return res.status(200).json({
+    message: "Profile edit successfully",
+    user
+});
   }catch(error){
    return res.status(500).json({message:`edit profile error ${error}`})
   }
