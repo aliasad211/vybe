@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect } from 'react'
 import { serverUrl } from '../App';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setProfileData, setUserData } from '../redux/userSlice';
 import { IoIosArrowRoundBack } from "react-icons/io";
@@ -12,6 +12,7 @@ function Profile() {
 
     const { userName } = useParams();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { profileData, userData } = useSelector(state => state.user);
 
     const handleProfile = async () => {
@@ -40,7 +41,7 @@ function Profile() {
         <div className='w-full min-h-screen bg-black'>
             <div className='text-white w-full h-20 flex justify-between items-center px-8'>
                 <div >
-                    <IoIosArrowRoundBack className='text-white w-7 h-7' />
+                    <IoIosArrowRoundBack className='text-white w-7 h-7' onClick={()=>navigate("/")}/>
                 </div>
                 <div className='font-semibold text-[20px]'>
                     {profileData?.userName}
