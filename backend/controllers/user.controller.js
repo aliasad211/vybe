@@ -51,7 +51,10 @@ export const editProfile = async(req,res)=>{
 
    user.name = name
    user.userName = userName
-   user.profileImage = profileImage
+   
+   if(profileImage){
+    user.profileImage = profileImage
+   }
    user.bio = bio
    user.profession = profession
    user.gender = gender

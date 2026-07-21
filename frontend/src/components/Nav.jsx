@@ -12,12 +12,12 @@ function Nav() {
     const {userData} = useSelector(state=>state.user);
     return (
         <div className='w-[90%] lg:w-[40%] h-20 bg-black flex justify-around items-center fixed bottom-5 rounded-full shadow-2xl shadow-black z-100'>
-            <div><GoHomeFill className='text-white w-6 h-6' /></div>
+            <div><GoHomeFill className='text-white cursor-pointer w-6 h-6' onClick={()=>navigate("/")} /></div>
             <div><FiSearch className='text-white w-6 h-6'/></div>
             <div><FiPlusSquare className='text-white w-6 h-6'/></div>
             <div><RxVideo className='text-white w-7 h-7' /></div>
             <div className='w-10 h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden' onClick={()=>navigate(`/profile/${userData.userName}`)}>
-                <img src={dp} className='w-full h-full object-cover' />
+                <img src={userData.profileImage || dp} className='w-full h-full object-cover' />
             </div>
             
         </div>
