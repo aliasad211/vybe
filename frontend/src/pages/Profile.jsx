@@ -41,7 +41,7 @@ function Profile() {
         <div className='w-full min-h-screen bg-black'>
             <div className='text-white w-full h-20 flex justify-between items-center px-8'>
                 <div >
-                    <IoIosArrowRoundBack className='text-white w-7 h-7' onClick={()=>navigate("/")}/>
+                    <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7' onClick={()=>navigate("/")}/>
                 </div>
                 <div className='font-semibold text-[20px]'>
                     {profileData?.userName}
@@ -110,7 +110,7 @@ function Profile() {
             <div className='w-full h-20 flex justify-center items-center gap-5 mt-2.5'>
              {profileData?._id == userData?._id 
              && 
-             <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl'>
+             <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl' onClick={()=>navigate("/editprofile")}>
                 Edit Profile
             </button>}
 
