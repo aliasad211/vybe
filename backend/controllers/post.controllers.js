@@ -1,3 +1,4 @@
+import { use } from "react";
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model";
@@ -52,7 +53,7 @@ export const like = async (req, res) => {
             return res.status(400).json({ message: "post not found" });
         }
         const isLiked = post.likes.some(
-            id => id.toString() === req.userId
+            id => id.toString() === req.userId.toString()
         );
 
         if(isLiked){
@@ -88,6 +89,30 @@ export const comment = async (req, res) => {
         post.populate("comments.author")
         return res.status(200).json(post);
     } catch (error) {
+     return res.status(500).json({ message: error.message });
+    }
+}
+
+
+//saved post controller
+export const saved = async(req,res)=>{
+    try{
+       const postId = req.params.postId;
+       const user = await User.findById(req.userId)
+
+        const isSaved = user.likes.some(
+            id => id.toString() === postId.toString()
+        );
+
+        if(isSaved){
+            user.saved = user.saved.filter(id=>id.toString() != req.postId.toString());
+        }else{
+            user.saved.push(postId);
+        }
+        await user.save()
+        user.populate("saved")
+        return res.status(200).json(user)
+    }catch(error){
      return res.status(500).json({ message: error.message });
     }
 }
