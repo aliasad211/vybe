@@ -1,7 +1,7 @@
 import { use } from "react";
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Post from "../models/post.model.js";
-import User from "../models/user.model";
+import User from "../models/user.model.js";
 
 //upload post controller
 export const uploadPost = async (req, res) => {
