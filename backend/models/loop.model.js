@@ -1,31 +1,37 @@
 import mongoose from "mongoose";
 
 const loopSchema = new mongoose.Schema({
-    author:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        required:true
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
-    media:{
-        type:String,
-        required:true
+    media: {
+        type: String,
+        required: true
     },
-    caption:{
-        type:String
+    caption: {
+        type: String
     },
-    likes:[
+    likes: [
         {
-         type:mongoose.Schema.Types.ObjectId,
-         ref:"User",
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
         }
     ],
-    comments:[
+    comments: [
         {
-         type:mongoose.Schema.Types.ObjectId,
-         ref:"User",
+            author: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            },
+            message: {
+                type: String
+            }
+
         }
     ]
-},{timestamps:true})
+}, { timestamps: true })
 
 const Loop = mongoose.model("Loop", loopSchema);
 
