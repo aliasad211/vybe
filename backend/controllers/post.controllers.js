@@ -36,7 +36,7 @@ export const uploadPost = async (req, res) => {
 //get all my post controller
 export const getAllPosts = async (req, res) => {
     try {
-        const posts = await Post.find({ author: req.userId }).populate("author", "name userName profileImage");
+        const posts = await Post.find({}).populate("author", "name userName profileImage");
         return res.status(200).json(posts);
     } catch (error) {
         return res.status(500).json({ message: error.message });

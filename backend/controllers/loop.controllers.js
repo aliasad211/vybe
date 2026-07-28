@@ -32,6 +32,16 @@ export const uploadLoop = async (req, res) => {
     }
 }
 
+//get all my loop controller
+export const getAllLoops = async (req, res) => {
+    try {
+        const loops = await Loop.find({}).populate("author", "name userName profileImage").populate("comments.author")
+        return res.status(200).json(loops);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
 //like controller
 export const like = async (req, res) => {
     try {
