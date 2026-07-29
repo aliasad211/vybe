@@ -56,3 +56,22 @@ export const viewStory = async(req,res)=>{
         return res.status(500).json({message:"story view error"})
     }
 }
+
+export const getStoryByUserName = async(req,res)=>{
+    try{
+      const userName = req.params.userName
+      const user = await User.findOne({userName})
+
+      if(!user){
+        return res.status(400).json({message:"user not found"})
+      }
+
+      const story = await Story.find({
+        author:user._id
+      }).populate("viewers author")
+
+      return res.status(200).json(story)
+    }catch(error){
+       return res.status(500).json({message:"story get by username error"})
+    }
+}
