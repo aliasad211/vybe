@@ -1,0 +1,84 @@
+import React from 'react'
+import { useState } from 'react';
+import { IoIosArrowRoundBack } from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
+import { FiPlusSquare } from "react-icons/fi";
+import { useRef } from 'react';
+
+function Upload() {
+const[uploadType, setUploadType] = useState("post");
+const[fontendMedia, setFrontendMedia] = useState(null);
+const[backendMedia, setBackendMedia] = useState(null);
+const[mediaType, setMediaType] = useState(null);
+const mediaInput = useRef();
+const navigate = useNavigate();
+
+const handleMedia = (e)=>{
+   const file = e.target.files[0]
+
+   if(file.type.includes("image")){
+    setMediaType("image")
+   }else{
+    setMediaType("vedio")
+   }
+   
+   setBackendMedia(file)
+   setFrontendMedia(URL.createObjectURL(file))
+}
+  return (
+    <div className='w-full min-h-screen bg-black flex items-center flex-col gap-5'>
+                <div className='w-full h-15 flex items-center gap-5 px-5'>
+                    <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7' onClick={() => navigate("/")} />
+                    <h1 className='text-white text-[20px] font-semibold'>Upload Media</h1>
+                </div>
+
+                <div className='w-[90%] max-w-150 h-20 bg-white rounded-full flex justify-around items-center gap-2.5'>
+                    <div className={` ${uploadType=="post" ? "bg-black rounded-full text-white cursor-pointer shadow-2xl shadow-black" : ""} w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold hover:bg-black rounded-full hover:text-white cursor-pointer hover:shadow-2xl hover:shadow-black`} onClick={()=>setUploadType("post")}>Post</div>
+                    <div className={` ${uploadType=="story" ? "bg-black rounded-full text-white cursor-pointer shadow-2xl shadow-black" : ""} w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold hover:bg-black rounded-full hover:text-white cursor-pointer hover:shadow-2xl hover:shadow-black`} onClick={()=>setUploadType("story")}>Story</div>
+                    <div className={`${uploadType=="loop" ? "bg-black rounded-full text-white cursor-pointer shadow-2xl shadow-black" : ""} w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold hover:bg-black rounded-full hover:text-white cursor-pointer hover:shadow-2xl hover:shadow-black`} onClick={()=>setUploadType("loop")}>Loop</div>
+                </div>
+                
+                {!fontendMedia && <div className='w-[80%] max-w-[500px] h-[250px] bg-[#0e1316] border-gray-800 border-2 flex flex-col items-center justify-center gap-2 mt-[15vh] rounded-2xl cursor-pointer hover:bg-[#353a3d]'
+                 onClick={()=>mediaInput.current.click()} onChange={handleMedia}>
+                   <input type='file' hidden ref={mediaInput}/>
+                   <FiPlusSquare className='text-white w-6 h-6 cursor-pointer'/>
+                    <div className='text-white text-[19px] font-semibold'>upload {uploadType}</div>
+                    
+                </div> }
+
+                {fontendMedia && 
+                <div className='w-[80%] max-w-[500px] h-[250px] flex flex-col items-center justify-center mt-[5vh]'>
+                  
+                  {mediaType === "image" && 
+                  <div className='w-[80%] max-w-[500px] h-[250px] flex flex-col items-center justify-center mt-[5vh]'>
+                    <img src={fontendMedia} className='h-[60%] rounded-2xl'/>
+                    {uploadType !== "story" && 
+                    <input type='text' className='w-full border-b-gray-400 border-b-2 outline-none px-2 py-1 text-white mt-4'
+                    placeholder='white caption'
+                    />
+                    }
+                    
+                 </div>}
+
+                 {mediaType === "vedio" && 
+                  <div className='w-[80%] max-w-[500px] h-[250px] flex flex-col items-center justify-center mt-[5vh]'>
+                    <img src={fontendMedia} className='h-[60%] rounded-2xl'/>
+                    {uploadType !== "story" && 
+                    <input type='text' className='w-full border-b-gray-400 border-b-2 outline-none px-2 py-1 text-white mt-4'
+                    placeholder='white caption'
+                    />
+                    }
+                    
+                 </div>}
+
+                </div>}
+
+                {fontendMedia && 
+                 <button className='px-[10px] w-[60%] max-w-100 py-1 h-12 bg-white mt-12 cursor-pointer rounded-2xl'>Upload {uploadType}</button>
+                }
+                
+    </div>
+  )
+}
+
+export default Upload
