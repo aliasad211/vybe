@@ -1,9 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userSlice from "./userSlice.js";
-console.log(userSlice);
+import postSlice from "./postSlice.js";
+import storySlice from "./storySlice.js";
+import loopSlice from "./loopSlice.js";
+
 const store = configureStore({
     reducer:{
-     user:userSlice
+     user:userSlice,
+     post:postSlice,
+     story:storySlice,
+     loop:loopSlice
     }
 })
 
