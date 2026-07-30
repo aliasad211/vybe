@@ -17,7 +17,7 @@ function Profile() {
 
     const handleProfile = async () => {
         try {
-            const response = await axios.get(`${serverUrl}/api/user/getProfile/${userName}`, { withCredentials: true });
+            const response = await axios.get(`${serverUrl}/api/user/profile/${userName}`, { withCredentials: true });
             dispatch(setProfileData(response.data));
         } catch (error) {
             console.log(error);

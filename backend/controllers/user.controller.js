@@ -72,7 +72,7 @@ export const editProfile = async(req,res)=>{
 
 export const getProfile = async(req,res)=>{
   try{
-    const userName = req.params.userName;
+    const userName = req.params.username;
     const user = await User.findOne({userName}).select("-password");
 
     if(!user){

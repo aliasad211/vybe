@@ -6,10 +6,16 @@ import { comment, getAllPosts, like, saved, uploadPost } from "../controllers/po
 
 const userRouter = express.Router();
 
-userRouter.post("/upload", isAuth,upload.single("media"), uploadPost);
-userRouter.get("/getAll", isAuth, getAllPosts);
-userRouter.get("/like/:postId", isAuth, like);
-userRouter.get("/save/:postId", isAuth, saved);
-userRouter.post("/comment/:postId", isAuth, comment);
+userRouter.get("/current", isAuth, getCurrentUser);
 
+userRouter.get("/suggested", isAuth, suggestedUsers);
+
+userRouter.post(
+  "/editProfile",
+  isAuth,
+  upload.single("profileImage"),
+  editProfile
+);
+
+userRouter.get("/profile/:username", isAuth, getProfile);
 export default userRouter;
