@@ -11,6 +11,7 @@ const[uploadType, setUploadType] = useState("post");
 const[fontendMedia, setFrontendMedia] = useState(null);
 const[backendMedia, setBackendMedia] = useState(null);
 const[mediaType, setMediaType] = useState(null);
+const [caption, setCaption] = useState();
 const mediaInput = useRef();
 const navigate = useNavigate();
 
@@ -56,6 +57,8 @@ const handleMedia = (e)=>{
                     {uploadType !== "story" && 
                     <input type='text' className='w-full border-b-gray-400 border-b-2 outline-none px-2 py-1 text-white mt-4'
                     placeholder='white caption'
+                    onChange={(e)=>setCaption(e.target.value)}
+                    value={caption}
                     />
                     }
                     
@@ -67,6 +70,8 @@ const handleMedia = (e)=>{
                     {uploadType !== "story" && 
                     <input type='text' className='w-full border-b-gray-400 border-b-2 outline-none px-2 py-1 text-white mt-4'
                     placeholder='white caption'
+                    onChange={(e)=>setCaption(e.target.value)}
+                    value={caption}
                     />
                     }
                     
