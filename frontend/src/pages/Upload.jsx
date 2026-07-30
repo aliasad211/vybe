@@ -4,6 +4,7 @@ import { IoIosArrowRoundBack } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 import { FiPlusSquare } from "react-icons/fi";
 import { useRef } from 'react';
+import VideoPlayer from '../components/VideoPlayer';
 
 function Upload() {
 const[uploadType, setUploadType] = useState("post");
@@ -62,7 +63,7 @@ const handleMedia = (e)=>{
 
                  {mediaType === "vedio" && 
                   <div className='w-[80%] max-w-[500px] h-[250px] flex flex-col items-center justify-center mt-[5vh]'>
-                    <img src={fontendMedia} className='h-[60%] rounded-2xl'/>
+                    <VideoPlayer media={fontendMedia}/>
                     {uploadType !== "story" && 
                     <input type='text' className='w-full border-b-gray-400 border-b-2 outline-none px-2 py-1 text-white mt-4'
                     placeholder='white caption'
