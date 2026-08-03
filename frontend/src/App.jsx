@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import { useSelector } from 'react-redux'
 import getCurrentUser from './hooks/getCurrentUser'
 import getSuggestedUsers from './hooks/getSuggestedUsers'
+import getAllPost from './hooks/getAllPosts'
 import Profile from './pages/Profile'
 import EditProfile from './pages/EditProfile'
 import Upload from './pages/Upload'
@@ -14,6 +15,7 @@ import Upload from './pages/Upload'
 export const serverUrl = "http://localhost:8000";
 
 function App() {
+  getAllPost();
   getCurrentUser();
   getSuggestedUsers();
   const {userData} = useSelector(state => state.user);

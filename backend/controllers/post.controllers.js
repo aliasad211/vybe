@@ -36,9 +36,12 @@ export const uploadPost = async (req, res) => {
 //get all my post controller
 export const getAllPosts = async (req, res) => {
     try {
-        const posts = await Post.find({}).populate("author", "name userName profileImage");
+        const posts = await Post.find({})
+            .populate("author", "name userName profileImage")
+            .sort({ createdAt: -1 });
         return res.status(200).json(posts);
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ message: error.message });
     }
 }
@@ -55,12 +58,12 @@ export const like = async (req, res) => {
             id => id.toString() === req.userId.toString()
         );
 
-        if(isLiked){
-            post.likes = post.likes.filter(id=>id.toString() != req.userId.toString());
-        }else{
+        if (isLiked) {
+            post.likes = post.likes.filter(id => id.toString() != req.userId.toString());
+        } else {
             post.likes.push(req.userId);
         }
-        
+
         await post.save();
         post.populate("author", "name userName profileImage");
         return res.status(200).json(post);
@@ -72,46 +75,46 @@ export const like = async (req, res) => {
 //comment controller
 export const comment = async (req, res) => {
     try {
-       const {message} = req.body;
-       const postId = req.params.postId;
-       const post = await Post.findById(postId)
+        const { message } = req.body;
+        const postId = req.params.postId;
+        const post = await Post.findById(postId)
         if (!post) {
             return res.status(400).json({ message: "post not found" });
         }
         post.comments.push({
-            author:req.userId,
-            message:message
+            author: req.userId,
+            message: message
         })
 
         await post.save();
         post.populate("author", "name userName profileImage"),
-        post.populate("comments.author")
+            post.populate("comments.author")
         return res.status(200).json(post);
     } catch (error) {
-     return res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 }
 
 
 //saved post controller
-export const saved = async(req,res)=>{
-    try{
-       const postId = req.params.postId;
-       const user = await User.findById(req.userId)
+export const saved = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const user = await User.findById(req.userId)
 
         const isSaved = user.likes.some(
             id => id.toString() === postId.toString()
         );
 
-        if(isSaved){
-            user.saved = user.saved.filter(id=>id.toString() != req.postId.toString());
-        }else{
+        if (isSaved) {
+            user.saved = user.saved.filter(id => id.toString() != req.postId.toString());
+        } else {
             user.saved.push(postId);
         }
         await user.save()
         user.populate("saved")
         return res.status(200).json(user)
-    }catch(error){
-     return res.status(500).json({ message: error.message });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
     }
 }
