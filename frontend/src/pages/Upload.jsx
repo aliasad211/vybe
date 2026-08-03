@@ -9,6 +9,8 @@ import axios from "axios";
 import { serverUrl } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPostData } from '../redux/postSlice';
+import { setStoryData } from "../redux/storySlice";
+import { setLoopData } from "../redux/loopSlice";
 import { ClipLoader } from "react-spinners";
 
 function Upload() {
@@ -79,7 +81,7 @@ const uploadLoop = async()=>{
     formData.append("media",backendMedia)
 
     const response = await axios.post(`${serverUrl}/api/loop/upload`,formData,{withCredentials:true})
-    dispatch(setloopData([...loopData, response.data]));
+    dispatch(setLoopData([...loopData, response.data]));
     setLoading(false);
     navigate("/");
   }catch(error){
