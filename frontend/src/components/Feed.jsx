@@ -3,8 +3,11 @@ import { FaRegHeart } from "react-icons/fa";
 import logo2 from "../assets/logo2.png";
 import StoryDp from './StoryDp.jsx';
 import Nav from './Nav.jsx';
-
+import { useSelector } from 'react-redux';
+import Post from './Post.jsx';
 export default function Feed() {
+    const {postData} = useSelector(state=>state.post);
+    console.log("this is post Data:",postData);
     return (
         <div className='lg:w-[50%] w-full bg-black min-h-screen lg:h-screen relative lg:overflow-y-auto hide-scrollbar'>
             <div className='lg:hidden md:block w-full h-25 flex items-center justify-between p-5'>
@@ -33,6 +36,9 @@ export default function Feed() {
 
             <div className='w-full min-h-screen flex flex-col items-center gap-5 p-2.5 pt-10 bg-white rounded-t-[60px] relative pb-30'>
                <Nav/>
+               {postData?.map((post,index)=>
+                <Post postData={post} key={index}/>
+               )}
             </div>
         </div>
     )
