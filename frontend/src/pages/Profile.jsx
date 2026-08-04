@@ -1,10 +1,12 @@
 import axios from 'axios';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { serverUrl } from '../App';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setProfileData, setUserData, toggleFollow } from '../redux/userSlice';
 import { IoIosArrowRoundBack } from "react-icons/io";
+import { FiGrid } from "react-icons/fi";
+import { FaRegBookmark } from "react-icons/fa6";
 import dp from "../assets/dp.jfif";
 import Nav from '../components/Nav';
 import Post from '../components/Post';
@@ -16,7 +18,12 @@ function Profile() {
     const navigate = useNavigate();
     const { profileData, userData, following } = useSelector(state => state.user);
     const { postData } = useSelector(state => state.post);
+    const [activeTab, setActiveTab] = useState("posts");
+
+    const isOwnProfile = profileData?._id === userData?._id;
     const userPosts = postData?.filter(post => post.author?._id === profileData?._id);
+    const savedPosts = postData?.filter(post => userData?.saved?.includes(post._id));
+    const visiblePosts = activeTab === "saved" ? savedPosts : userPosts;
 
     const handleProfile = async () => {
         try {
@@ -29,6 +36,7 @@ function Profile() {
 
     useEffect(() => {
         handleProfile();
+        setActiveTab("posts");
     }, [userName, dispatch])
 
     const isFollowing = following.includes(profileData?._id);
@@ -150,9 +158,30 @@ function Profile() {
                 <div className='w-full max-w-225 flex flex-col items-center bg-white rounded-t-[30px] relative pt-5 gap-5 pb-30'>
 
                  <Nav/>
-                 {userPosts?.map((post, index) =>
+
+                 {isOwnProfile &&
+                 <div className='w-full flex items-center justify-center gap-15 border-b border-gray-200 pb-2.5'>
+                    <div
+                        className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 ${activeTab === "posts" ? "text-black font-semibold border-b-2 border-black" : "text-gray-400"}`}
+                        onClick={() => setActiveTab("posts")}
+                    >
+                        <FiGrid className='w-5 h-5'/>
+                        <span>Posts</span>
+                    </div>
+                    <div
+                        className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 ${activeTab === "saved" ? "text-black font-semibold border-b-2 border-black" : "text-gray-400"}`}
+                        onClick={() => setActiveTab("saved")}
+                    >
+                        <FaRegBookmark className='w-4 h-4'/>
+                        <span>Saved</span>
+                    </div>
+                 </div>}
+
+                 {visiblePosts?.map((post, index) =>
                     <Post postData={post} key={index} />
                  )}
+                 {activeTab === "saved" && visiblePosts?.length === 0 &&
+                    <div className='text-gray-400 py-10'>No saved posts yet</div>}
                  </div>
             </div>
         </div>
