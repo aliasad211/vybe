@@ -5,6 +5,8 @@ import { GoHeart } from "react-icons/go";
 import { GoHeartFill } from "react-icons/go";
 import { useSelector } from "react-redux";
 import { MdOutlineInsertComment } from "react-icons/md";
+import { FaRegBookmark } from "react-icons/fa6";
+import { FaBookmark } from "react-icons/fa6";
 
 function Post({ postData }) {
   const { userData } = useSelector(state => state.user);
@@ -55,7 +57,8 @@ function Post({ postData }) {
 
         </div>
         <div>
-
+          {!userData.saved.includes(postData?._id) && <FaRegBookmark className='w-6 h-6 cursor-pointer'/>}
+          {userData.saved.includes(postData?._id) && <FaBookmark className='w-6 h-6 cursor-pointer'/>}
         </div>
       </div>
     </div>
