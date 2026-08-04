@@ -1,17 +1,37 @@
-import React from 'react'
+import React, { useState } from 'react'
+import axios from 'axios';
 import dp from "../assets/dp.jfif";
 import VideoPlayer from '../components/VideoPlayer';
 import { GoHeart } from "react-icons/go";
 import { GoHeartFill } from "react-icons/go";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { MdOutlineInsertComment } from "react-icons/md";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaBookmark } from "react-icons/fa6";
+import { IoSend } from "react-icons/io5";
+import { serverUrl } from '../App';
+import { setPostData } from '../redux/postSlice';
 
 function Post({ postData }) {
   const { userData } = useSelector(state => state.user);
+  const allPosts = useSelector(state => state.post.postData);
+  const dispatch = useDispatch();
+  const [showComment, setShowComment] = useState(false);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
+
+  const handleComment = async () => {
+    if (!message.trim()) return;
+    try {
+      const response = await axios.post(`${serverUrl}/api/post/comment/${postData._id}`, { message }, { withCredentials: true });
+      dispatch(setPostData(allPosts.map(p => p._id === response.data._id ? response.data : p)));
+      setMessage("");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <div className='w-[90%] flex flex-col gap-[10px] bg-white items-center shadow-2xl shadow-[#00000058] rounded-2xl'>
       <div className='w-full h-20 flex justify-between items-center px-2.5'>
@@ -49,7 +69,7 @@ function Post({ postData }) {
           </div>
 
           <div className='flex justify-center items-center gap-1'>
-            <MdOutlineInsertComment className='w-6 h-6 cursor-pointer' />
+            <MdOutlineInsertComment className='w-6 h-6 cursor-pointer' onClick={() => setShowComment(prev => !prev)} />
             <span>{postData.comments?.length || 0}</span>
           </div>
 
@@ -65,6 +85,41 @@ function Post({ postData }) {
           <span className='font-semibold shrink-0'>{postData.author?.userName}</span>
           <span className='break-words'>{postData.caption}</span>
         </div>}
+
+      {showComment &&
+        <div className='w-full flex flex-col gap-3 px-5 pb-5'>
+
+          <div className='w-full flex items-center gap-2.5'>
+            <div className='w-10 h-10 border-2 border-black rounded-full overflow-hidden shrink-0'>
+              <img src={userData.profileImage || dp} className='w-full h-full object-cover' />
+            </div>
+            <input
+              type='text'
+              placeholder='Write comment...'
+              className='w-full h-10 px-2.5 outline-none border-b-2 border-gray-300'
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleComment()}
+            />
+            <button className='cursor-pointer disabled:opacity-40' onClick={handleComment} disabled={!message.trim()}>
+              <IoSend className='w-5 h-5' />
+            </button>
+          </div>
+
+          <div className='w-full max-h-[200px] overflow-auto flex flex-col gap-2.5'>
+            {postData.comments?.map((com, index) =>
+              <div key={index} className='w-full flex items-center gap-2.5 border-b border-gray-200 pb-1.5'>
+                <div className='w-8 h-8 border border-black rounded-full overflow-hidden shrink-0'>
+                  <img src={com.author?.profileImage || dp} className='w-full h-full object-cover' />
+                </div>
+                <span className='font-semibold text-[14px] shrink-0'>{com.author?.userName}</span>
+                <span className='text-[14px] break-words'>{com.message}</span>
+              </div>
+            )}
+          </div>
+
+        </div>
+      }
 
     </div>
   )

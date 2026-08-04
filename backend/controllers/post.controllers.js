@@ -38,6 +38,7 @@ export const getAllPosts = async (req, res) => {
     try {
         const posts = await Post.find({})
             .populate("author", "name userName profileImage")
+            .populate("comments.author", "name userName profileImage")
             .sort({ createdAt: -1 });
         return res.status(200).json(posts);
     } catch (error) {
@@ -65,7 +66,8 @@ export const like = async (req, res) => {
         }
 
         await post.save();
-        post.populate("author", "name userName profileImage");
+        await post.populate("author", "name userName profileImage");
+        await post.populate("comments.author", "name userName profileImage");
         return res.status(200).json(post);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -87,8 +89,8 @@ export const comment = async (req, res) => {
         })
 
         await post.save();
-        post.populate("author", "name userName profileImage"),
-            post.populate("comments.author")
+        await post.populate("author", "name userName profileImage");
+        await post.populate("comments.author", "name userName profileImage");
         return res.status(200).json(post);
     } catch (error) {
         return res.status(500).json({ message: error.message });
