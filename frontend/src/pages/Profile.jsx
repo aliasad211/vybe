@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { serverUrl } from '../App';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { setProfileData, setUserData } from '../redux/userSlice';
+import { setProfileData, setUserData, toggleFollow } from '../redux/userSlice';
 import { IoIosArrowRoundBack } from "react-icons/io";
 import dp from "../assets/dp.jfif";
 import Nav from '../components/Nav';
@@ -13,7 +13,7 @@ function Profile() {
     const { userName } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { profileData, userData } = useSelector(state => state.user);
+    const { profileData, userData, following } = useSelector(state => state.user);
 
     const handleProfile = async () => {
         try {
@@ -27,6 +27,23 @@ function Profile() {
     useEffect(() => {
         handleProfile();
     }, [userName, dispatch])
+
+    const isFollowing = following.includes(profileData?._id);
+
+    //keeps the overlapping stack spacing for the first 3 avatars
+    const stackPosition = ["", "absolute left-2.5", "absolute left-5"];
+
+    const handleFollow = async () => {
+        const targetId = profileData?._id;
+        dispatch(toggleFollow(targetId));
+        try {
+            const response = await axios.get(`${serverUrl}/api/user/follow/${targetId}`, { withCredentials: true });
+            dispatch(setProfileData(response.data.targetUser));
+        } catch (error) {
+            dispatch(toggleFollow(targetId));
+            console.log(error);
+        }
+    }
 
     const handleLogOut = async () => {
         try {
@@ -70,15 +87,15 @@ function Profile() {
                 <div>
                     <div className='flex items-center justify-center gap-5'>
                         <div className='flex relative'>
-                            <div className='w-10 h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
-                                <img src={profileData?.profileImage || dp} className='w-full h-full object-cover' />
-                            </div>
-                            <div className='w-10 h-10 border-2 border-black rounded-full absolute cursor-pointer overflow-hidden left-2.5'>
-                                <img src={profileData?.profileImage || dp} className='w-full h-full object-cover' />
-                            </div>
-                            <div className='w-10 h-10 border-2 border-black rounded-full absolute cursor-pointer overflow-hidden left-5'>
-                                <img src={profileData?.profileImage || dp} className='w-full h-full object-cover' />
-                            </div>
+                            {profileData?.followers?.slice(0, 3).map((user, index) =>
+                                <div
+                                    key={user._id || index}
+                                    className={`w-10 h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden ${stackPosition[index]}`}
+                                    onClick={() => navigate(`/profile/${user.userName}`)}
+                                >
+                                    <img src={user.profileImage || dp} className='w-full h-full object-cover' />
+                                </div>
+                            )}
                         </div>
                         <div className='text-white font-semibold text-[22px] md:text-[30px]'>
                             {profileData?.followers?.length}
@@ -89,15 +106,15 @@ function Profile() {
                 <div>
                     <div className='flex items-center justify-center gap-5'>
                         <div className='flex relative'>
-                            <div className='w-10 h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
-                                <img src={profileData?.profileImage || dp} className='w-full h-full object-cover' />
-                            </div>
-                            <div className='w-10 h-10 border-2 border-black rounded-full absolute cursor-pointer overflow-hidden left-2.5'>
-                                <img src={profileData?.profileImage || dp} className='w-full h-full object-cover' />
-                            </div>
-                            <div className='w-10 h-10 border-2 border-black rounded-full absolute cursor-pointer overflow-hidden left-5'>
-                                <img src={profileData?.profileImage || dp} className='w-full h-full object-cover' />
-                            </div>
+                            {profileData?.following?.slice(0, 3).map((user, index) =>
+                                <div
+                                    key={user._id || index}
+                                    className={`w-10 h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden ${stackPosition[index]}`}
+                                    onClick={() => navigate(`/profile/${user.userName}`)}
+                                >
+                                    <img src={user.profileImage || dp} className='w-full h-full object-cover' />
+                                </div>
+                            )}
                         </div>
                         <div className='text-white font-semibold text-[22px] md:text-[30px]'>
                             {profileData?.following?.length}
@@ -117,8 +134,8 @@ function Profile() {
             {profileData?._id !== userData?._id 
              &&
              <>
-             <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl'>
-              Follow
+             <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl' onClick={handleFollow}>
+              {isFollowing ? "Unfollow" : "Follow"}
             </button>
             <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl'>
                 Message

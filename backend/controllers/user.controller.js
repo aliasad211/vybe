@@ -70,10 +70,58 @@ export const editProfile = async(req,res)=>{
   }
 }
 
+export const follow = async(req,res)=>{
+  try{
+    const currentUserId = req.userId;
+    const targetUserId = req.params.userId;
+
+    if(currentUserId.toString() === targetUserId.toString()){
+      return res.status(400).json({message:"you can not follow yourself"});
+    }
+
+    const currentUser = await User.findById(currentUserId).select("-password");
+    const targetUser = await User.findById(targetUserId).select("-password");
+
+    if(!currentUser || !targetUser){
+      return res.status(400).json({message:"user not found"});
+    }
+
+    const isFollowing = currentUser.following.some(
+      id => id.toString() === targetUserId.toString()
+    );
+
+    if(isFollowing){
+      currentUser.following = currentUser.following.filter(id => id.toString() !== targetUserId.toString());
+      targetUser.followers = targetUser.followers.filter(id => id.toString() !== currentUserId.toString());
+    }else{
+      currentUser.following.push(targetUserId);
+      targetUser.followers.push(currentUserId);
+    }
+
+    await currentUser.save();
+    await targetUser.save();
+
+    //profile page needs the follower/following avatars, so send them populated
+    await targetUser.populate("followers", "name userName profileImage");
+    await targetUser.populate("following", "name userName profileImage");
+
+    return res.status(200).json({
+      following: !isFollowing,
+      currentUser,
+      targetUser
+    });
+  }catch(error){
+    return res.status(500).json({message:`follow error ${error}`})
+  }
+}
+
 export const getProfile = async(req,res)=>{
   try{
     const userName = req.params.username;
-    const user = await User.findOne({userName}).select("-password");
+    const user = await User.findOne({userName})
+      .select("-password")
+      .populate("followers", "name userName profileImage")
+      .populate("following", "name userName profileImage");
 
     if(!user){
       return res.status(400).json({message:"user not found"});

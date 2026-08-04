@@ -12,10 +12,10 @@ import { FaBookmark } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
 import { serverUrl } from '../App';
 import { setPostData } from '../redux/postSlice';
-import { setUserData } from '../redux/userSlice';
+import { setUserData, toggleFollow } from '../redux/userSlice';
 
 function Post({ postData }) {
-  const { userData } = useSelector(state => state.user);
+  const { userData, following } = useSelector(state => state.user);
   const allPosts = useSelector(state => state.post.postData);
   const dispatch = useDispatch();
   const [showComment, setShowComment] = useState(false);
@@ -27,6 +27,20 @@ function Post({ postData }) {
       const response = await axios.get(`${serverUrl}/api/post/like/${postData._id}`, { withCredentials: true });
       dispatch(setPostData(allPosts.map(p => p._id === response.data._id ? response.data : p)));
     } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const authorId = postData.author?._id;
+  const isFollowing = following.includes(authorId);
+  const isOwnPost = authorId === userData._id;
+
+  const handleFollow = async () => {
+    dispatch(toggleFollow(authorId));
+    try {
+      await axios.get(`${serverUrl}/api/user/follow/${authorId}`, { withCredentials: true });
+    } catch (error) {
+      dispatch(toggleFollow(authorId));
       console.log(error);
     }
   }
@@ -62,9 +76,10 @@ function Post({ postData }) {
             {postData.author?.userName}
           </div>
         </div>
-        <button className='px-[10px] w-15 md:w-25 py-1 h-7 md:h-10 bg-black text-white rounded-2xl text-[14px] md:text-[16px]'>
-          Follow
-        </button>
+        {!isOwnPost &&
+          <button className='px-[10px] w-20 md:w-25 py-1 h-7 md:h-10 bg-black text-white rounded-2xl text-[14px] md:text-[16px] cursor-pointer' onClick={handleFollow}>
+            {isFollowing ? "Unfollow" : "Follow"}
+          </button>}
       </div>
       <div className='w-[90%] flex flex-col items-center justify-center pb-5'>
 
