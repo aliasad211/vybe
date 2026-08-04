@@ -7,6 +7,7 @@ import { setProfileData, setUserData, toggleFollow } from '../redux/userSlice';
 import { IoIosArrowRoundBack } from "react-icons/io";
 import dp from "../assets/dp.jfif";
 import Nav from '../components/Nav';
+import Post from '../components/Post';
 
 function Profile() {
 
@@ -14,6 +15,8 @@ function Profile() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { profileData, userData, following } = useSelector(state => state.user);
+    const { postData } = useSelector(state => state.post);
+    const userPosts = postData?.filter(post => post.author?._id === profileData?._id);
 
     const handleProfile = async () => {
         try {
@@ -144,9 +147,12 @@ function Profile() {
             </div>
             
             <div className='w-full min-h-screen flex justify-center'>
-                <div className='w-full max-w-225 flex flex-col items-center bg-white rounded-t-[30px] relative pt-30 gap-5'>
+                <div className='w-full max-w-225 flex flex-col items-center bg-white rounded-t-[30px] relative pt-5 gap-5 pb-30'>
 
                  <Nav/>
+                 {userPosts?.map((post, index) =>
+                    <Post postData={post} key={index} />
+                 )}
                  </div>
             </div>
         </div>
