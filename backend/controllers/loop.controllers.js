@@ -25,7 +25,7 @@ export const uploadLoop = async (req, res) => {
 
         const populatedLoop = await Loop.findById(loop._id).populate("author", "name userName profileImage");
 
-        return res.status(201).json({ message: "Loop uploaded Successfully", populatedLoop });
+        return res.status(201).json(populatedLoop);
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: error.message });

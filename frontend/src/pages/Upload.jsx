@@ -49,7 +49,7 @@ const uploadPost = async()=>{
     formData.append("media",backendMedia)
 
     const response = await axios.post(`${serverUrl}/api/post/upload`,formData,{withCredentials:true})
-    dispatch(setPostData([...postData, response.data]));
+    dispatch(setPostData([response.data, ...postData]));
     setLoading(false);
     navigate("/");
   }catch(error){
@@ -138,7 +138,9 @@ const handleUpload = ()=>{
 
                  {mediaType === "video" && 
                   <div className='w-[80%] max-w-[500px] h-[250px] flex flex-col items-center justify-center mt-[5vh]'>
-                    <VideoPlayer media={fontendMedia}/>
+                    <div className='w-full h-[60%]'>
+                      <VideoPlayer media={fontendMedia}/>
+                    </div>
                     {uploadType !== "story" && 
                     <input type='text' className='w-full border-b-gray-400 border-b-2 outline-none px-2 py-1 text-white mt-4'
                     placeholder='white caption'
