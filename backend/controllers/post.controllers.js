@@ -102,19 +102,21 @@ export const comment = async (req, res) => {
 export const saved = async (req, res) => {
     try {
         const postId = req.params.postId;
-        const user = await User.findById(req.userId)
+        const user = await User.findById(req.userId).select("-password")
+        if (!user) {
+            return res.status(400).json({ message: "user not found" });
+        }
 
-        const isSaved = user.likes.some(
+        const isSaved = user.saved.some(
             id => id.toString() === postId.toString()
         );
 
         if (isSaved) {
-            user.saved = user.saved.filter(id => id.toString() != req.postId.toString());
+            user.saved = user.saved.filter(id => id.toString() != postId.toString());
         } else {
             user.saved.push(postId);
         }
         await user.save()
-        user.populate("saved")
         return res.status(200).json(user)
     } catch (error) {
         return res.status(500).json({ message: error.message });

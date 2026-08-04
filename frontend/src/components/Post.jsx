@@ -12,6 +12,7 @@ import { FaBookmark } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
 import { serverUrl } from '../App';
 import { setPostData } from '../redux/postSlice';
+import { setUserData } from '../redux/userSlice';
 
 function Post({ postData }) {
   const { userData } = useSelector(state => state.user);
@@ -20,6 +21,24 @@ function Post({ postData }) {
   const [showComment, setShowComment] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+
+  const handleLike = async () => {
+    try {
+      const response = await axios.get(`${serverUrl}/api/post/like/${postData._id}`, { withCredentials: true });
+      dispatch(setPostData(allPosts.map(p => p._id === response.data._id ? response.data : p)));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleSaved = async () => {
+    try {
+      const response = await axios.get(`${serverUrl}/api/post/saved/${postData._id}`, { withCredentials: true });
+      dispatch(setUserData(response.data));
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleComment = async () => {
     if (!message.trim()) return;
@@ -36,10 +55,10 @@ function Post({ postData }) {
     <div className='w-[90%] flex flex-col gap-[10px] bg-white items-center shadow-2xl shadow-[#00000058] rounded-2xl'>
       <div className='w-full h-20 flex justify-between items-center px-2.5'>
         <div className='flex justify-center items-center gap-2.5 md:gap-5'>
-          <div className='w-10 h-10 md:w-15 md:h-15 border-2 border-black rounded-full cursor-pointer overflow-hidden' onClick={() => navigate(`/profile/${userData.userName}`)}>
+          <div className='w-10 h-10 md:w-15 md:h-15 border-2 border-black rounded-full cursor-pointer overflow-hidden' onClick={() => navigate(`/profile/${postData.author?.userName}`)}>
             <img src={postData.author?.profileImage || dp} className='w-full h-full object-cover' />
           </div>
-          <div className='w-50 font-semibold truncate'>
+          <div className='w-50 font-semibold truncate cursor-pointer' onClick={() => navigate(`/profile/${postData.author?.userName}`)}>
             {postData.author?.userName}
           </div>
         </div>
@@ -63,8 +82,8 @@ function Post({ postData }) {
       <div className='w-full h-15 flex justify-between items-center px-5 mt-2.5'>
         <div className='flex justify-center items-center gap-2.5'>
           <div className='flex justify-center items-center gap-1'>
-            {!postData.likes?.includes(userData._id) && <GoHeart className='w-6 h-6 cursor-pointer' />}
-            {postData.likes?.includes(userData._id) && <GoHeartFill className='w-6 h-6 cursor-pointer text-red-600' />}
+            {!postData.likes?.includes(userData._id) && <GoHeart className='w-6 h-6 cursor-pointer' onClick={handleLike} />}
+            {postData.likes?.includes(userData._id) && <GoHeartFill className='w-6 h-6 cursor-pointer text-red-600' onClick={handleLike} />}
             <span>{postData.likes?.length || 0}</span>
           </div>
 
@@ -75,8 +94,8 @@ function Post({ postData }) {
 
         </div>
         <div>
-          {!userData.saved?.includes(postData?._id) && <FaRegBookmark className='w-6 h-6 cursor-pointer'/>}
-          {userData.saved?.includes(postData?._id) && <FaBookmark className='w-6 h-6 cursor-pointer'/>}
+          {!userData.saved?.includes(postData?._id) && <FaRegBookmark className='w-6 h-6 cursor-pointer' onClick={handleSaved}/>}
+          {userData.saved?.includes(postData?._id) && <FaBookmark className='w-6 h-6 cursor-pointer' onClick={handleSaved}/>}
         </div>
       </div>
 
