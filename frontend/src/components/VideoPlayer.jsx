@@ -4,7 +4,7 @@ import { IoMdVolumeOff } from "react-icons/io";
 
 // cloudinary can render a frame of the video as a jpg, which loads in a fraction of
 // the time the video does — without it the box sits blank while the mp4 buffers
-const posterFor = (url) =>
+export const posterFor = (url) =>
   typeof url === "string" && url.includes("/video/upload/")
     ? url.replace("/video/upload/", "/video/upload/so_1/").replace(/\.[a-zA-Z0-9]+$/, ".jpg")
     : undefined;

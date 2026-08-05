@@ -114,7 +114,7 @@ const handleUpload = ()=>{
                 
                 {!fontendMedia && <div className='w-[80%] max-w-[500px] h-[250px] bg-[#0e1316] border-gray-800 border-2 flex flex-col items-center justify-center gap-2 mt-[15vh] rounded-2xl cursor-pointer hover:bg-[#353a3d]'
                  onClick={()=>mediaInput.current.click()} >
-                   <input type='file' hidden ref={mediaInput} onChange={handleMedia}/>
+                   <input type='file' accept={uploadType == "loop" ? "video/*" : ""} hidden ref={mediaInput} onChange={handleMedia}/>
                    <FiPlusSquare className='text-white w-6 h-6 cursor-pointer'/>
                     <div className='text-white text-[19px] font-semibold'>upload {uploadType}</div>
                     

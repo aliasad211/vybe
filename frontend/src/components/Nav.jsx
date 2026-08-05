@@ -15,7 +15,7 @@ function Nav() {
             <div><GoHomeFill className='text-white cursor-pointer w-6 h-6' onClick={()=>navigate("/")} /></div>
             <div><FiSearch className='text-white w-6 h-6'/></div>
             <div><FiPlusSquare className='text-white w-6 h-6 cursor-pointer' onClick={()=>navigate("/upload")}/></div>
-            <div><RxVideo className='text-white w-7 h-7' /></div>
+            <div><RxVideo className='text-white w-7 h-7 cursor-pointer'onClick={()=>navigate("/loops")} /></div>
             <div className='w-10 h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden' onClick={()=>navigate(`/profile/${userData.userName}`)}>
                 <img src={userData.profileImage || dp} className='w-full h-full object-cover' />
             </div>

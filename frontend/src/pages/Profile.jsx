@@ -69,7 +69,7 @@ function Profile() {
         <div className='w-full min-h-screen bg-black'>
             <div className='text-white w-full h-20 flex justify-between items-center px-8'>
                 <div >
-                    <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7' onClick={()=>navigate("/")}/>
+                    <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7' onClick={() => navigate("/")} />
                 </div>
                 <div className='font-semibold text-[20px]'>
                     {profileData?.userName}
@@ -136,53 +136,71 @@ function Profile() {
             </div>
 
             <div className='w-full h-20 flex justify-center items-center gap-5 mt-2.5'>
-             {profileData?._id == userData?._id 
-             && 
-             <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl' onClick={()=>navigate("/editprofile")}>
-                Edit Profile
-            </button>}
+                {profileData?._id == userData?._id
+                    &&
+                    <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl' onClick={() => navigate("/editprofile")}>
+                        Edit Profile
+                    </button>}
 
-            {profileData?._id !== userData?._id 
-             &&
-             <>
-             <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl' onClick={handleFollow}>
-              {isFollowing ? "Unfollow" : "Follow"}
-            </button>
-            <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl'>
-                Message
-            </button>
-            </>}
+                {profileData?._id !== userData?._id
+                    &&
+                    <>
+                        <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl' onClick={handleFollow}>
+                            {isFollowing ? "Unfollow" : "Follow"}
+                        </button>
+                        <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl'>
+                            Message
+                        </button>
+                    </>}
             </div>
-            
+
             <div className='w-full min-h-screen flex justify-center'>
                 <div className='w-full max-w-225 flex flex-col items-center bg-white rounded-t-[30px] relative pt-5 gap-5 pb-30'>
 
-                 <Nav/>
+                    <Nav />
 
-                 {isOwnProfile &&
-                 <div className='w-full flex items-center justify-center gap-15 border-b border-gray-200 pb-2.5'>
-                    <div
-                        className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 ${activeTab === "posts" ? "text-black font-semibold border-b-2 border-black" : "text-gray-400"}`}
-                        onClick={() => setActiveTab("posts")}
-                    >
-                        <FiGrid className='w-5 h-5'/>
-                        <span>Posts</span>
-                    </div>
-                    <div
-                        className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 ${activeTab === "saved" ? "text-black font-semibold border-b-2 border-black" : "text-gray-400"}`}
-                        onClick={() => setActiveTab("saved")}
-                    >
-                        <FaRegBookmark className='w-4 h-4'/>
-                        <span>Saved</span>
-                    </div>
-                 </div>}
+                    {isOwnProfile &&
+                        <div className='w-full flex items-center justify-center gap-15 border-b border-gray-200 pb-2.5'>
+                            <div
+                                className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 ${activeTab === "posts" ? "text-black font-semibold border-b-2 border-black" : "text-gray-400"}`}
+                                onClick={() => setActiveTab("posts")}
+                            >
+                                <FiGrid className='w-5 h-5' />
+                                <span>Posts</span>
+                            </div>
+                            <div
+                                className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 ${activeTab === "saved" ? "text-black font-semibold border-b-2 border-black" : "text-gray-400"}`}
+                                onClick={() => setActiveTab("saved")}
+                            >
+                                <FaRegBookmark className='w-4 h-4' />
+                                <span>Saved</span>
+                            </div>
+                        </div>}
 
-                 {visiblePosts?.map((post, index) =>
-                    <Post postData={post} key={index} />
-                 )}
-                 {activeTab === "saved" && visiblePosts?.length === 0 &&
-                    <div className='text-gray-400 py-10'>No saved posts yet</div>}
-                 </div>
+                    {visiblePosts?.length > 0 ? (
+                        visiblePosts.map((post) => (
+                            <Post key={post._id} postData={post} />
+                        ))
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-16">
+                            <div className="w-20 h-20 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                                <FiGrid className="w-10 h-10 text-gray-400" />
+                            </div>
+
+                            <h2 className="mt-4 text-xl font-semibold">
+                                {activeTab === "saved" ? "No Saved Posts" : "No Posts Yet"}
+                            </h2>
+
+                            <p className="text-gray-500 mt-2">
+                                {activeTab === "saved"
+                                    ? "You haven't saved any posts yet."
+                                    : isOwnProfile
+                                        ? "Share your first post."
+                                        : `${profileData?.name || "This user"} hasn't shared any posts yet.`}
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )

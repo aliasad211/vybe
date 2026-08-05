@@ -1,0 +1,207 @@
+import React, { useEffect, useRef, useState } from 'react'
+import axios from 'axios'
+import dp from "../assets/dp.jfif"
+import { GoHeart, GoHeartFill } from "react-icons/go"
+import { MdOutlineInsertComment } from "react-icons/md"
+import { IoMdVolumeHigh, IoMdVolumeOff } from "react-icons/io"
+import { IoSend } from "react-icons/io5"
+import { IoClose } from "react-icons/io5"
+import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
+import { serverUrl } from '../App'
+import { setLoopData } from '../redux/loopSlice'
+import { toggleFollow } from '../redux/userSlice'
+import { posterFor } from './VideoPlayer'
+
+function LoopCard({ loopData }) {
+  const { userData, following } = useSelector(state => state.user)
+  const allLoops = useSelector(state => state.loop.loopData)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const videoTag = useRef()
+  const cardRef = useRef()
+
+  const [mute, setMute] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const [showComment, setShowComment] = useState(false)
+  const [message, setMessage] = useState("")
+
+  // only the loop the user has scrolled to should play — otherwise every video in
+  // the feed runs at once and fights for bandwidth
+  useEffect(() => {
+    const card = cardRef.current
+    const video = videoTag.current
+    if (!card || !video) return
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        video.muted = true
+        video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+      } else {
+        video.pause()
+        video.currentTime = 0
+        setIsPlaying(false)
+      }
+    }, { threshold: 0.6 })
+
+    observer.observe(card)
+    return () => observer.disconnect()
+  }, [loopData.media])
+
+  const handleClick = () => {
+    const video = videoTag.current
+    if (!video) return
+    if (isPlaying) {
+      video.pause()
+      setIsPlaying(false)
+    } else {
+      video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+    }
+  }
+
+  const handleError = () => {
+    console.error("loop video failed to load:", loopData.media, videoTag.current?.error)
+    setFailed(true)
+    setIsPlaying(false)
+  }
+
+  const handleLike = async () => {
+    try {
+      const response = await axios.get(`${serverUrl}/api/loop/like/${loopData._id}`, { withCredentials: true })
+      dispatch(setLoopData(allLoops.map(l => l._id === response.data._id ? response.data : l)))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleComment = async () => {
+    if (!message.trim()) return
+    try {
+      const response = await axios.post(`${serverUrl}/api/loop/comment/${loopData._id}`, { message }, { withCredentials: true })
+      dispatch(setLoopData(allLoops.map(l => l._id === response.data._id ? response.data : l)))
+      setMessage("")
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const authorId = loopData.author?._id
+  const isFollowing = following.includes(authorId)
+  const isOwnLoop = authorId === userData._id
+
+  const handleFollow = async () => {
+    dispatch(toggleFollow(authorId))
+    try {
+      await axios.get(`${serverUrl}/api/user/follow/${authorId}`, { withCredentials: true })
+    } catch (error) {
+      dispatch(toggleFollow(authorId))
+      console.log(error)
+    }
+  }
+
+  return (
+    <div ref={cardRef} className='w-full lg:w-[480px] h-[100dvh] shrink-0 snap-start relative flex items-center justify-center bg-black border-b border-gray-800 overflow-hidden'>
+
+      <video
+        ref={videoTag}
+        src={loopData.media}
+        poster={posterFor(loopData.media)}
+        loop
+        muted={mute}
+        playsInline
+        preload='metadata'
+        className='w-full h-full object-cover'
+        onClick={handleClick}
+        onError={handleError}
+      />
+
+      {failed &&
+        <div className='absolute inset-0 flex items-center justify-center text-white text-[14px] bg-black/70'>
+          video could not be loaded
+        </div>}
+
+      {/* right action rail */}
+      <div className='absolute right-3 bottom-32 flex flex-col items-center gap-6 z-10'>
+        <div className='flex flex-col items-center gap-1'>
+          {loopData.likes?.includes(userData._id)
+            ? <GoHeartFill className='w-7 h-7 text-red-600 cursor-pointer' onClick={handleLike} />
+            : <GoHeart className='w-7 h-7 text-white cursor-pointer' onClick={handleLike} />}
+          <span className='text-white text-[13px]'>{loopData.likes?.length || 0}</span>
+        </div>
+
+        <div className='flex flex-col items-center gap-1'>
+          <MdOutlineInsertComment className='w-7 h-7 text-white cursor-pointer' onClick={() => setShowComment(true)} />
+          <span className='text-white text-[13px]'>{loopData.comments?.length || 0}</span>
+        </div>
+
+        <div onClick={() => setMute(prev => !prev)}>
+          {mute
+            ? <IoMdVolumeOff className='w-7 h-7 text-white cursor-pointer' />
+            : <IoMdVolumeHigh className='w-7 h-7 text-white cursor-pointer' />}
+        </div>
+      </div>
+
+      {/* author + caption */}
+      <div className='absolute bottom-24 left-0 w-full px-4 flex flex-col gap-2.5 z-10'>
+        <div className='flex items-center gap-2.5'>
+          <div className='w-10 h-10 border-2 border-white rounded-full cursor-pointer overflow-hidden shrink-0' onClick={() => navigate(`/profile/${loopData.author?.userName}`)}>
+            <img src={loopData.author?.profileImage || dp} className='w-full h-full object-cover' />
+          </div>
+          <span className='text-white font-semibold truncate cursor-pointer' onClick={() => navigate(`/profile/${loopData.author?.userName}`)}>
+            {loopData.author?.userName}
+          </span>
+          {!isOwnLoop &&
+            <button className='px-3 py-1 border border-white text-white rounded-2xl text-[13px] cursor-pointer' onClick={handleFollow}>
+              {isFollowing ? "Unfollow" : "Follow"}
+            </button>}
+        </div>
+
+        {loopData.caption &&
+          <div className='text-white text-[15px] break-words pr-14'>{loopData.caption}</div>}
+      </div>
+
+      {/* comment sheet */}
+      <div className={`absolute bottom-0 left-0 w-full h-[55%] bg-white rounded-t-2xl z-20 flex flex-col transition-transform duration-300 ${showComment ? "translate-y-0" : "translate-y-full"}`}>
+        <div className='w-full flex justify-between items-center px-5 py-3 border-b border-gray-200'>
+          <span className='font-semibold'>Comments ({loopData.comments?.length || 0})</span>
+          <IoClose className='w-6 h-6 cursor-pointer' onClick={() => setShowComment(false)} />
+        </div>
+
+        <div className='w-full flex-1 overflow-auto flex flex-col gap-2.5 px-5 py-3'>
+          {loopData.comments?.length === 0 &&
+            <div className='w-full text-center text-gray-400 text-[14px] mt-5'>No comments yet</div>}
+          {loopData.comments?.map((com, index) =>
+            <div key={index} className='w-full flex items-center gap-2.5 border-b border-gray-200 pb-1.5'>
+              <div className='w-8 h-8 border border-black rounded-full overflow-hidden shrink-0'>
+                <img src={com.author?.profileImage || dp} className='w-full h-full object-cover' />
+              </div>
+              <span className='font-semibold text-[14px] shrink-0'>{com.author?.userName}</span>
+              <span className='text-[14px] break-words'>{com.message}</span>
+            </div>
+          )}
+        </div>
+
+        <div className='w-full flex items-center gap-2.5 px-5 py-3 border-t border-gray-200'>
+          <div className='w-10 h-10 border-2 border-black rounded-full overflow-hidden shrink-0'>
+            <img src={userData.profileImage || dp} className='w-full h-full object-cover' />
+          </div>
+          <input
+            type='text'
+            placeholder='Write comment...'
+            className='w-full h-10 px-2.5 outline-none border-b-2 border-gray-300'
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleComment()}
+          />
+          <button className='cursor-pointer disabled:opacity-40' onClick={handleComment} disabled={!message.trim()}>
+            <IoSend className='w-5 h-5' />
+          </button>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+export default LoopCard
