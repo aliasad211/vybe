@@ -9,7 +9,7 @@ function Loop() {
     const { loopData } = useSelector(state => state.loop);
 
     return (
-        <div className='w-full h-[100dvh] bg-black relative'>
+        <div className='w-full h-dvh bg-black relative'>
 
             <div className='w-full h-15 flex items-center gap-5 px-5 fixed top-2.5 left-0 z-30'>
                 <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7' onClick={() => navigate("/")} />

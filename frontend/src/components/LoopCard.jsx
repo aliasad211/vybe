@@ -170,7 +170,7 @@ function LoopCard({ loopData }) {
   }
 
   return (
-    <div ref={cardRef} className='w-full lg:w-[480px] h-[100dvh] shrink-0 snap-start relative flex items-center justify-center bg-black border-b border-gray-800 overflow-hidden'>
+    <div ref={cardRef} className='w-full lg:w-120 h-screen shrink-0 snap-start relative flex items-center justify-center bg-black border-b border-gray-800 overflow-hidden'>
 
       <video
         ref={videoTag}
@@ -233,7 +233,7 @@ function LoopCard({ loopData }) {
         </div>
 
         {loopData.caption &&
-          <div className='text-white text-[15px] break-words pr-14'>{loopData.caption}</div>}
+          <div className='text-white text-[15px] wrap-break-words pr-14'>{loopData.caption}</div>}
       </div>
 
       {/* progress bar — padded wrapper gives the thin track a usable touch target */}
@@ -247,7 +247,7 @@ function LoopCard({ loopData }) {
         <div ref={barRef} className={`w-full bg-white/30 rounded-full transition-all duration-150 ${seeking ? "h-1.5" : "h-1"}`}>
           <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }}>
             {seeking &&
-              <div className='w-3 h-3 bg-white rounded-full -mt-[3px] -mr-1.5 float-right' />}
+              <div className='w-3 h-3 bg-white rounded-full -mt-0.75 -mr-1.5 float-right' />}
           </div>
         </div>
       </div>
@@ -268,7 +268,7 @@ function LoopCard({ loopData }) {
                 <img src={com.author?.profileImage || dp} className='w-full h-full object-cover' />
               </div>
               <span className='font-semibold text-[14px] shrink-0'>{com.author?.userName}</span>
-              <span className='text-[14px] break-words'>{com.message}</span>
+              <span className='text-[14px] wrap-break-words'>{com.message}</span>
             </div>
           )}
         </div>
