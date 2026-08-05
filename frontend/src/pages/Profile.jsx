@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { serverUrl } from '../App';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,18 +21,30 @@ function Profile() {
     const [activeTab, setActiveTab] = useState("posts");
 
     const isOwnProfile = profileData?._id === userData?._id;
-    const userPosts = postData?.filter(post => post.author?._id === profileData?._id);
-    const savedPosts = postData?.filter(post => userData?.saved?.includes(post._id));
+    // const userPosts = postData?.filter(post => post.author?._id === profileData?._id);
+    const userPosts = useMemo(() => {
+        return postData?.filter(
+            post => post.author?._id === profileData?._id
+        );
+    }, [postData, profileData]);
+  
+    // const savedPosts = postData?.filter(post => userData?.saved?.includes(post._id));
+    const savedPosts = useMemo(() => {
+        return postData?.filter(
+            post => userData?.saved?.includes(post._id)
+        );
+    }, [postData, userData]);
+    
     const visiblePosts = activeTab === "saved" ? savedPosts : userPosts;
 
-    const handleProfile = async () => {
+    const handleProfile = useCallback(async () => {
         try {
             const response = await axios.get(`${serverUrl}/api/user/profile/${userName}`, { withCredentials: true });
             dispatch(setProfileData(response.data));
         } catch (error) {
             console.log(error);
         }
-    }
+    }, [userName, dispatch])
 
     useEffect(() => {
         handleProfile();
