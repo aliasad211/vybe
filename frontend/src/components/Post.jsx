@@ -66,7 +66,7 @@ function Post({ postData }) {
   }
 
   return (
-    <div className='w-[90%] flex flex-col gap-[10px] bg-white items-center shadow-2xl shadow-[#00000058] rounded-2xl'>
+    <div className='w-[90%] flex flex-col gap-2.5 bg-white items-center shadow-2xl shadow-[#00000058] rounded-2xl'>
       <div className='w-full h-20 flex justify-between items-center px-2.5'>
         <div className='flex justify-center items-center gap-2.5 md:gap-5'>
           <div className='w-10 h-10 md:w-15 md:h-15 border-2 border-black rounded-full cursor-pointer overflow-hidden' onClick={() => navigate(`/profile/${postData.author?.userName}`)}>
@@ -77,19 +77,19 @@ function Post({ postData }) {
           </div>
         </div>
         {!isOwnPost &&
-          <button className='px-[10px] w-20 md:w-25 py-1 h-7 md:h-10 bg-black text-white rounded-2xl text-[14px] md:text-[16px] cursor-pointer' onClick={handleFollow}>
+          <button className='px-2.5 w-20 md:w-25 py-1 h-7 md:h-10 bg-black text-white rounded-2xl text-[14px] md:text-[16px] cursor-pointer' onClick={handleFollow}>
             {isFollowing ? "Unfollow" : "Follow"}
           </button>}
       </div>
       <div className='w-[90%] flex flex-col items-center justify-center pb-5'>
 
         {postData.mediaType === "image" &&
-          <div className='w-[90%] h-[400px] flex items-center justify-center'>
+          <div className='w-[90%] h-100 flex items-center justify-center'>
             <img src={postData.media} className='max-w-full max-h-full rounded-2xl object-contain' />
           </div>}
 
         {postData.mediaType === "video" &&
-          <div className='w-[90%] h-[400px] flex items-center justify-center'>
+          <div className='w-[90%] h-100 flex items-center justify-center'>
             <VideoPlayer media={postData.media} />
           </div>}
 
@@ -117,7 +117,7 @@ function Post({ postData }) {
       {postData.caption &&
         <div className='w-full px-5 pb-5 flex gap-2 text-[15px]'>
           <span className='font-semibold shrink-0'>{postData.author?.userName}</span>
-          <span className='break-words'>{postData.caption}</span>
+          <span className='wrap-break-words'>{postData.caption}</span>
         </div>}
 
       {showComment &&
@@ -140,14 +140,14 @@ function Post({ postData }) {
             </button>
           </div>
 
-          <div className='w-full max-h-[200px] overflow-auto flex flex-col gap-2.5'>
+          <div className='w-full max-h-50 overflow-auto flex flex-col gap-2.5'>
             {postData.comments?.map((com, index) =>
               <div key={index} className='w-full flex items-center gap-2.5 border-b border-gray-200 pb-1.5'>
                 <div className='w-8 h-8 border border-black rounded-full overflow-hidden shrink-0'>
                   <img src={com.author?.profileImage || dp} className='w-full h-full object-cover' />
                 </div>
                 <span className='font-semibold text-[14px] shrink-0'>{com.author?.userName}</span>
-                <span className='text-[14px] break-words'>{com.message}</span>
+                <span className='text-[14px] wrap-break-words'>{com.message}</span>
               </div>
             )}
           </div>

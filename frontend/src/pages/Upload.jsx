@@ -112,7 +112,7 @@ const handleUpload = ()=>{
                     <div className={`${uploadType=="loop" ? "bg-black rounded-full text-white cursor-pointer shadow-2xl shadow-black" : ""} w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold hover:bg-black rounded-full hover:text-white cursor-pointer hover:shadow-2xl hover:shadow-black`} onClick={()=>setUploadType("loop")}>Loop</div>
                 </div>
                 
-                {!fontendMedia && <div className='w-[80%] max-w-[500px] h-[250px] bg-[#0e1316] border-gray-800 border-2 flex flex-col items-center justify-center gap-2 mt-[15vh] rounded-2xl cursor-pointer hover:bg-[#353a3d]'
+                {!fontendMedia && <div className='w-[80%] max-w-125 h-62.5 bg-[#0e1316] border-gray-800 border-2 flex flex-col items-center justify-center gap-2 mt-[15vh] rounded-2xl cursor-pointer hover:bg-[#353a3d]'
                  onClick={()=>mediaInput.current.click()} >
                    <input type='file' accept={uploadType == "loop" ? "video/*" : ""} hidden ref={mediaInput} onChange={handleMedia}/>
                    <FiPlusSquare className='text-white w-6 h-6 cursor-pointer'/>
@@ -121,10 +121,10 @@ const handleUpload = ()=>{
                 </div> }
 
                 {fontendMedia && 
-                <div className='w-[80%] max-w-[500px] h-[250px] flex flex-col items-center justify-center mt-[5vh]'>
+                <div className='w-[80%] max-w-125 h-62.5 flex flex-col items-center justify-center mt-[5vh]'>
                   
                   {mediaType === "image" && 
-                  <div className='w-[80%] max-w-[500px] h-[250px] flex flex-col items-center justify-center mt-[5vh]'>
+                  <div className='w-[80%] max-w-125 h-62.5 flex flex-col items-center justify-center mt-[5vh]'>
                     <img src={fontendMedia} className='h-[60%] rounded-2xl'/>
                     {uploadType !== "story" && 
                     <input type='text' className='w-full border-b-gray-400 border-b-2 outline-none px-2 py-1 text-white mt-4'
@@ -137,7 +137,7 @@ const handleUpload = ()=>{
                  </div>}
 
                  {mediaType === "video" && 
-                  <div className='w-[80%] max-w-[500px] h-[250px] flex flex-col items-center justify-center mt-[5vh]'>
+                  <div className='w-[80%] max-w-125 h-62.5 flex flex-col items-center justify-center mt-[5vh]'>
                     <div className='w-full h-[60%]'>
                       <VideoPlayer media={fontendMedia}/>
                     </div>
@@ -154,7 +154,7 @@ const handleUpload = ()=>{
                 </div>}
 
                 {fontendMedia && 
-                 <button className='px-[10px] w-[60%] max-w-100 py-1 h-12 bg-white mt-12 cursor-pointer rounded-2xl' onClick={handleUpload}>{loading ? <ClipLoader size={30} color='black' /> : `Upload ${uploadType}`}</button>
+                 <button className='px-2.5 w-[60%] max-w-100 py-1 h-12 bg-white mt-12 cursor-pointer rounded-2xl' onClick={handleUpload}>{loading ? <ClipLoader size={30} color='black' /> : `Upload ${uploadType}`}</button>
                 }
                 
     </div>
