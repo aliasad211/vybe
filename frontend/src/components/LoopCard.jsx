@@ -29,6 +29,10 @@ function LoopCard({ loopData }) {
   const [message, setMessage] = useState("")
   const [progress, setProgress] = useState(0)
   const [seeking, setSeeking] = useState(false)
+  const [burst, setBurst] = useState(0)   // bumped on every double tap; 0 = hidden
+
+  const clickTimer = useRef(null)
+  const burstTimer = useRef(null)
 
   // only the loop the user has scrolled to should play — otherwise every video in
   // the feed runs at once and fights for bandwidth
@@ -53,7 +57,12 @@ function LoopCard({ loopData }) {
     return () => observer.disconnect()
   }, [loopData.media])
 
-  const handleClick = () => {
+  useEffect(() => () => {
+    clearTimeout(clickTimer.current)
+    clearTimeout(burstTimer.current)
+  }, [])
+
+  const togglePlay = () => {
     const video = videoTag.current
     if (!video) return
     if (isPlaying) {
@@ -62,6 +71,28 @@ function LoopCard({ loopData }) {
     } else {
       video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
     }
+  }
+
+  const handleDoubleTap = () => {
+    setBurst(prev => prev + 1)
+    clearTimeout(burstTimer.current)
+    burstTimer.current = setTimeout(() => setBurst(0), 900)
+    // the like endpoint is a toggle — a double tap should only ever like, never unlike
+    if (!loopData.likes?.includes(userData._id)) handleLike()
+  }
+
+  // hold the play/pause a moment: if a second tap lands it was a double tap (like), not a pause
+  const handleClick = () => {
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current)
+      clickTimer.current = null
+      handleDoubleTap()
+      return
+    }
+    clickTimer.current = setTimeout(() => {
+      clickTimer.current = null
+      togglePlay()
+    }, 250)
   }
 
   const handleTimeUpdate = () => {
@@ -158,6 +189,11 @@ function LoopCard({ loopData }) {
       {failed &&
         <div className='absolute inset-0 flex items-center justify-center text-white text-[14px] bg-black/70'>
           video could not be loaded
+        </div>}
+
+      {burst > 0 &&
+        <div key={burst} className='like-burst absolute inset-0 flex items-center justify-center pointer-events-none z-10'>
+          <GoHeartFill className='w-24 h-24 text-white drop-shadow-lg' />
         </div>}
 
       {/* right action rail */}

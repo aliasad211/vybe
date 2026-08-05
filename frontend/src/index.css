@@ -9,3 +9,17 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* heart that pops on double tap */
+@keyframes like-burst {
+  0% { transform: scale(0); opacity: 0; }
+  15% { transform: scale(1.25); opacity: 1; }
+  30% { transform: scale(0.92); }
+  45% { transform: scale(1); }
+  75% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+
+.like-burst {
+  animation: like-burst 900ms ease-out forwards;
+}
