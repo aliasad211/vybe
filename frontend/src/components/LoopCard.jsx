@@ -20,12 +20,15 @@ function LoopCard({ loopData }) {
   const navigate = useNavigate()
   const videoTag = useRef()
   const cardRef = useRef()
+  const barRef = useRef()
 
   const [mute, setMute] = useState(true)
   const [isPlaying, setIsPlaying] = useState(false)
   const [failed, setFailed] = useState(false)
   const [showComment, setShowComment] = useState(false)
   const [message, setMessage] = useState("")
+  const [progress, setProgress] = useState(0)
+  const [seeking, setSeeking] = useState(false)
 
   // only the loop the user has scrolled to should play — otherwise every video in
   // the feed runs at once and fights for bandwidth
@@ -42,6 +45,7 @@ function LoopCard({ loopData }) {
         video.pause()
         video.currentTime = 0
         setIsPlaying(false)
+        setProgress(0)
       }
     }, { threshold: 0.6 })
 
@@ -58,6 +62,40 @@ function LoopCard({ loopData }) {
     } else {
       video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
     }
+  }
+
+  const handleTimeUpdate = () => {
+    const video = videoTag.current
+    // while scrubbing the bar follows the pointer, not the (lagging) video clock
+    if (!video || !video.duration || seeking) return
+    setProgress((video.currentTime / video.duration) * 100)
+  }
+
+  const seekTo = (clientX) => {
+    const bar = barRef.current
+    const video = videoTag.current
+    if (!bar || !video || !video.duration) return
+    const rect = bar.getBoundingClientRect()
+    const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1)
+    video.currentTime = ratio * video.duration
+    setProgress(ratio * 100)
+  }
+
+  // pointer capture so a drag that wanders off the thin bar keeps scrubbing
+  const handleSeekStart = (e) => {
+    setSeeking(true)
+    e.currentTarget.setPointerCapture(e.pointerId)
+    seekTo(e.clientX)
+  }
+
+  const handleSeekMove = (e) => {
+    if (seeking) seekTo(e.clientX)
+  }
+
+  const handleSeekEnd = (e) => {
+    if (!seeking) return
+    e.currentTarget.releasePointerCapture(e.pointerId)
+    setSeeking(false)
   }
 
   const handleError = () => {
@@ -114,6 +152,7 @@ function LoopCard({ loopData }) {
         className='w-full h-full object-cover'
         onClick={handleClick}
         onError={handleError}
+        onTimeUpdate={handleTimeUpdate}
       />
 
       {failed &&
@@ -159,6 +198,22 @@ function LoopCard({ loopData }) {
 
         {loopData.caption &&
           <div className='text-white text-[15px] break-words pr-14'>{loopData.caption}</div>}
+      </div>
+
+      {/* progress bar — padded wrapper gives the thin track a usable touch target */}
+      <div
+        className='absolute bottom-0 left-0 w-full px-3 py-3 z-10 cursor-pointer touch-none'
+        onPointerDown={handleSeekStart}
+        onPointerMove={handleSeekMove}
+        onPointerUp={handleSeekEnd}
+        onPointerCancel={handleSeekEnd}
+      >
+        <div ref={barRef} className={`w-full bg-white/30 rounded-full transition-all duration-150 ${seeking ? "h-1.5" : "h-1"}`}>
+          <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }}>
+            {seeking &&
+              <div className='w-3 h-3 bg-white rounded-full -mt-[3px] -mr-1.5 float-right' />}
+          </div>
+        </div>
       </div>
 
       {/* comment sheet */}
