@@ -26,7 +26,9 @@ const storySchema = new mongoose.Schema({
     ],
     createdAt:{
       type:Date,
-      default:Date.now(),
+      //Date.now (not Date.now()) — calling it here would freeze every story's
+      //expiry to the moment the server booted
+      default:Date.now,
       expires:86400
     }
 },{timestamps:true})

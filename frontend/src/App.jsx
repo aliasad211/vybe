@@ -13,6 +13,7 @@ import EditProfile from './pages/EditProfile'
 import Upload from './pages/Upload'
 import Loops from './pages/Loop'
 import getAllLoops from './hooks/getAllLoops'
+import getAllStories from './hooks/getAllStories'
 import Story from './pages/Story'
 export const serverUrl = "http://localhost:8000";
 
@@ -21,6 +22,7 @@ function App() {
   getCurrentUser();
   getSuggestedUsers();
   getAllLoops();
+  getAllStories();
   const {userData} = useSelector(state => state.user);
   
   return (
@@ -33,7 +35,7 @@ function App() {
       <Route path='/editprofile' element={userData?<EditProfile/>:<Navigate to={"/signin"}/>}/>
       <Route path='/upload' element={userData?<Upload/>:<Navigate to={"/signin"}/>}/>
       <Route path='/loops' element={userData?<Loops/>:<Navigate to={"/signin"}/>}/>
-      <Route path='/story' element={userData?<Story/>:<Navigate to={"/signin"}/>}/>
+      <Route path='/story/:userName' element={userData?<Story/>:<Navigate to={"/signin"}/>}/>
     </Routes>
   )
 }

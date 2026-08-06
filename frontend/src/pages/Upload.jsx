@@ -9,7 +9,7 @@ import axios from "axios";
 import { serverUrl } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPostData } from '../redux/postSlice';
-import { setStoryData } from "../redux/storySlice";
+import { setUserData } from "../redux/userSlice";
 import { setLoopData } from "../redux/loopSlice";
 import { ClipLoader } from "react-spinners";
 
@@ -23,7 +23,7 @@ const mediaInput = useRef();
 const navigate = useNavigate();
 const dispatch = useDispatch();
 const {postData} = useSelector(state=>state.post);
-const {storyData} = useSelector(state=>state.story);
+const {userData} = useSelector(state=>state.user);
 const {loopData} = useSelector(state=>state.loop);
 const [loading, setLoading] = useState(false);
 
@@ -65,11 +65,14 @@ const uploadStory = async()=>{
     formData.append("media",backendMedia)
 
     const response = await axios.post(`${serverUrl}/api/story/upload`,formData,{withCredentials:true})
-    dispatch(setStoryData([...storyData, response.data]));
+    //storyData is the tray of people you follow — your own story lives on userData,
+    //so light the ring there instead of refetching the whole user
+    dispatch(setUserData({...userData, story:response.data}));
     setLoading(false);
     navigate("/");
   }catch(error){
    console.log(error);
+   setLoading(false);
   }
 }
 

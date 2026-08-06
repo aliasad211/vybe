@@ -5,6 +5,9 @@ import uploadOnCloudinary from "../config/cloudinary.js";
 export const uploadStory = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(400).json({ message: "user not found" })
+    }
     if (user.story) {
       await Story.findByIdAndDelete(user.story)
       user.story = null;
@@ -70,10 +73,38 @@ export const getStoryByUserName = async (req, res) => {
 
     const story = await Story.find({
       author: user._id
-    }).populate("viewers author")
+    })
+      .populate("author", "name userName profileImage")
+      .populate("viewers", "name userName profileImage")
+      .sort({ createdAt: -1 })
 
     return res.status(200).json(story)
   } catch (error) {
     return res.status(500).json({ message: "story get by username error" })
+  }
+}
+
+//the story tray on the feed — everyone the current user follows who still has a
+//live story. expired ones are gone from the collection already (24h TTL), so no
+//date filtering is needed here
+export const getAllStories = async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.userId)
+
+    if (!currentUser) {
+      return res.status(400).json({ message: "user not found" })
+    }
+
+    const stories = await Story.find({
+      author: { $in: currentUser.following }
+    })
+      .populate("author", "name userName profileImage")
+      .populate("viewers", "name userName profileImage")
+      .sort({ createdAt: -1 })
+
+    return res.status(200).json(stories)
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "get all stories error" })
   }
 }

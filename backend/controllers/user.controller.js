@@ -4,7 +4,9 @@ import User from "../models/user.model.js";
 const getCurrentUser = async(req,res)=>{
     try{
          const userId =  req.userId;
-         const user = await User.findById(userId).populate("posts loops");
+         //story is populated so an expired one (TTL removed the doc) comes back as
+         //null instead of a dangling id that would keep the story ring lit
+         const user = await User.findById(userId).populate("posts loops story");
 
          if(!user){
             return res.status(400).json({

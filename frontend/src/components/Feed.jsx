@@ -8,6 +8,7 @@ import Post from './Post.jsx';
 export default function Feed() {
     const {postData} = useSelector(state=>state.post);
     const {userData} = useSelector(state=>state.user);
+    const {storyData} = useSelector(state=>state.story);
     return (
         <div className='lg:w-[50%] w-full bg-black min-h-screen lg:h-screen relative lg:overflow-y-auto hide-scrollbar'>
             <div className='lg:hidden md:block w-full h-25 flex items-center justify-between p-5'>
@@ -19,6 +20,14 @@ export default function Feed() {
 
             <div className='flex w-full overflow-auto hide-scrollbar gap-4 p-5'>
               <StoryDp userName={"Your Story"} profileImage={userData.profileImage} story={userData.story}/>
+              {storyData?.map(story=>
+                <StoryDp
+                  key={story._id}
+                  userName={story.author?.userName}
+                  profileImage={story.author?.profileImage}
+                  story={story}
+                />
+              )}
             </div>
 
             <div className='w-full min-h-screen flex flex-col items-center gap-5 p-2.5 pt-10 bg-white rounded-t-[60px] relative pb-30'>
