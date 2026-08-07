@@ -4,6 +4,7 @@ import postSlice from "./postSlice.js";
 import storySlice from "./storySlice.js";
 import loopSlice from "./loopSlice.js";
 import messageSlice from "./messageSlice.js";
+import notificationSlice from "./notificationSlice.js";
 
 const store = configureStore({
     reducer:{
@@ -11,7 +12,8 @@ const store = configureStore({
      post:postSlice,
      story:storySlice,
      loop:loopSlice,
-     message:messageSlice
+     message:messageSlice,
+     notification:notificationSlice
     }
 })
 
