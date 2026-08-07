@@ -15,7 +15,9 @@ import Loops from './pages/Loop'
 import getAllLoops from './hooks/getAllLoops'
 import getAllStories from './hooks/getAllStories'
 import useSocket from './hooks/useSocket'
+import getNotifications from './hooks/getNotifications'
 import Story from './pages/Story'
+import Notifications from './pages/Notifications'
 export const serverUrl = "http://localhost:8000";
 
 function App() {
@@ -24,6 +26,7 @@ function App() {
   getSuggestedUsers();
   getAllLoops();
   getAllStories();
+  getNotifications();
   useSocket();
   const {userData} = useSelector(state => state.user);
   
@@ -38,6 +41,7 @@ function App() {
       <Route path='/upload' element={userData?<Upload/>:<Navigate to={"/signin"}/>}/>
       <Route path='/loops' element={userData?<Loops/>:<Navigate to={"/signin"}/>}/>
       <Route path='/story/:userName' element={userData?<Story/>:<Navigate to={"/signin"}/>}/>
+      <Route path='/notifications' element={userData?<Notifications/>:<Navigate to={"/signin"}/>}/>
     </Routes>
   )
 }
