@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { io } from 'socket.io-client'
 import { serverUrl } from '../App'
 import { setOnlineUsers, addMessage, setConversations } from '../redux/messageSlice'
+import { addNotification } from '../redux/notificationSlice'
 
 function useSocket() {
   const dispatch = useDispatch()
@@ -25,6 +26,10 @@ function useSocket() {
 
     socket.on('getOnlineUsers', (onlineUsers) => {
       dispatch(setOnlineUsers(onlineUsers))
+    })
+
+    socket.on('newNotification', (notification) => {
+      dispatch(addNotification(notification))
     })
 
     socket.on('newMessage', async (message) => {
