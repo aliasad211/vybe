@@ -1,5 +1,6 @@
 import uploadOnCloudinary from "../config/cloudinary.js";
 import User from "../models/user.model.js";
+import { createNotification } from "./notification.controllers.js";
 
 const getCurrentUser = async(req,res)=>{
     try{
@@ -102,6 +103,10 @@ export const follow = async(req,res)=>{
 
     await currentUser.save();
     await targetUser.save();
+
+    if (!isFollowing) {
+      await createNotification({ recipient: targetUserId, sender: currentUserId, type: "follow" });
+    }
 
     //profile page needs the follower/following avatars, so send them populated
     await targetUser.populate("followers", "name userName profileImage");
