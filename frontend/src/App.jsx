@@ -14,6 +14,7 @@ import Upload from './pages/Upload'
 import Loops from './pages/Loop'
 import getAllLoops from './hooks/getAllLoops'
 import getAllStories from './hooks/getAllStories'
+import useSocket from './hooks/useSocket'
 import Story from './pages/Story'
 export const serverUrl = "http://localhost:8000";
 
@@ -23,6 +24,7 @@ function App() {
   getSuggestedUsers();
   getAllLoops();
   getAllStories();
+  useSocket();
   const {userData} = useSelector(state => state.user);
   
   return (
