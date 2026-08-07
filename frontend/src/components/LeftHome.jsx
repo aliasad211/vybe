@@ -3,6 +3,7 @@ import logo2 from "../assets/logo2.png";
 import dp from "../assets/dp.jfif";
 import { FaRegHeart } from "react-icons/fa";
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { serverUrl } from '../App';
 import { setUserData } from '../redux/userSlice';
 import axios from 'axios';
@@ -10,7 +11,9 @@ import OtherUser from './OtherUser';
 
 function LeftHome() {
     const { userData, suggestedUsers } = useSelector(state => state.user);
+    const { unreadCount } = useSelector(state => state.notification);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const handleLogOut = async () => {
         try {
             const response = await axios.get(`${serverUrl}/api/auth/signout`, { withCredentials: true });
@@ -23,8 +26,12 @@ function LeftHome() {
         <div className='w-[25%] hidden lg:block min-h-screen bg-black border-r-2 border-gray-700'>
             <div className='w-full h-25 flex items-center justify-between p-5'>
                 <img src={logo2} alt='' className='w-20' />
-                <div>
+                <div className='relative cursor-pointer' onClick={() => navigate("/notifications")}>
                     <FaRegHeart className='text-white w-6 h-6' />
+                    {unreadCount > 0 &&
+                        <span className='absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center'>
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>}
                 </div>
             </div>
             <div className='flex items-center w-full border-b-2 border-gray-600 py-3 px-5 justify-between gap-2.5'>
