@@ -4,6 +4,7 @@ import { serverUrl } from '../App';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setProfileData, setUserData, toggleFollow } from '../redux/userSlice';
+import { setSelectedUser } from '../redux/messageSlice';
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { FiGrid } from "react-icons/fi";
 import { FaRegBookmark } from "react-icons/fa6";
@@ -66,6 +67,11 @@ function Profile() {
             dispatch(toggleFollow(targetId));
             console.log(error);
         }
+    }
+
+    const handleMessage = () => {
+        dispatch(setSelectedUser(profileData));
+        navigate("/");
     }
 
     const handleLogOut = async () => {
@@ -160,7 +166,7 @@ function Profile() {
                         <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl' onClick={handleFollow}>
                             {isFollowing ? "Unfollow" : "Follow"}
                         </button>
-                        <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl'>
+                        <button className='px-2.5 min-w-40 py-1 h-10 bg-white cursor-pointer rounded-2xl' onClick={handleMessage}>
                             Message
                         </button>
                     </>}
