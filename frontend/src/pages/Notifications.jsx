@@ -17,22 +17,32 @@ const timeAgo = (date) => {
   return `${Math.floor(mins / 1440)}d ago`
 }
 
-const typeText = {
-  like: "liked your post",
-  comment: "commented on your post",
-  follow: "started following you"
-}
-
 const typeIcon = {
   like: <FaHeart className='size-2.5 text-notification' />,
   comment: <FaRegComment className='size-2.5 text-primary' />,
   follow: <FaUserPlus className='size-2.5 text-emerald-500' />
 }
 
+//a like or comment can land on either a post or a loop, so the wording follows
+//whichever one the notification points at
+const describe = ({ type, loop }) => {
+  if (type === "follow") return "started following you"
+  const target = loop ? "loop" : "post"
+  return type === "like" ? `liked your ${target}` : `commented on your ${target}`
+}
+
+//loops are always video, so both thumbnails come from the cloudinary poster frame
+const thumbnailFor = ({ post, loop }) => {
+  if (loop) return posterFor(loop.media)
+  if (!post) return null
+  return post.mediaType === "video" ? posterFor(post.media) : post.media
+}
+
 function Notifications() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { notifications } = useSelector(state => state.notification)
+  const { userData } = useSelector(state => state.user)
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -47,6 +57,14 @@ function Notifications() {
     }
     fetchNotifications()
   }, [dispatch])
+
+  //there is no single post route yet, so a post notification opens your own
+  //profile, which is where the post it refers to lives
+  const openTarget = (notification) => {
+    if (notification.type === "follow") return navigate(`/profile/${notification.sender?.userName}`)
+    if (notification.loop) return navigate("/loops")
+    return navigate(`/profile/${userData?.userName}`)
+  }
 
   return (
     <div className='min-h-screen w-full bg-background'>
@@ -68,40 +86,41 @@ function Notifications() {
           </div>}
 
         <div className='flex flex-col gap-2'>
-          {notifications?.map((notification) => (
-            <button
-              key={notification._id}
-              className={`flex w-full items-center gap-3.5 rounded-2xl border px-3.5 py-3 text-left transition hover:bg-accent/50 ${notification.seen
-                ? "border-border/70 bg-card"
-                : "border-primary/30 bg-accent/60"}`}
-              onClick={() => navigate(`/profile/${notification.sender?.userName}`)}
-            >
-              <div className='relative size-11 shrink-0'>
-                <div className='size-11 overflow-hidden rounded-full ring-1 ring-border'>
-                  <img src={notification.sender?.profileImage || dp} className='size-full object-cover' />
+          {notifications?.map((notification) => {
+            const thumbnail = thumbnailFor(notification)
+
+            return (
+              <button
+                key={notification._id}
+                className={`flex w-full items-center gap-3.5 rounded-2xl border px-3.5 py-3 text-left transition hover:bg-accent/50 ${notification.seen
+                  ? "border-border/70 bg-card"
+                  : "border-primary/30 bg-accent/60"}`}
+                onClick={() => openTarget(notification)}
+              >
+                <div className='relative size-11 shrink-0'>
+                  <div className='size-11 overflow-hidden rounded-full ring-1 ring-border'>
+                    <img src={notification.sender?.profileImage || dp} className='size-full object-cover' />
+                  </div>
+                  <span className='absolute -bottom-0.5 -right-0.5 grid size-5 place-items-center rounded-full border-2 border-card bg-card'>
+                    {typeIcon[notification.type]}
+                  </span>
                 </div>
-                <span className='absolute -bottom-0.5 -right-0.5 grid size-5 place-items-center rounded-full border-2 border-card bg-card'>
-                  {typeIcon[notification.type]}
-                </span>
-              </div>
 
-              <div className='min-w-0 flex-1'>
-                <p className='text-[13px] leading-5 text-muted-foreground'>
-                  <span className='font-semibold text-foreground'>{notification.sender?.userName}</span>{' '}
-                  {typeText[notification.type]}
-                </p>
-                <span className='mt-0.5 block text-[11px] text-muted-foreground'>{timeAgo(notification.createdAt)}</span>
-              </div>
+                <div className='min-w-0 flex-1'>
+                  <p className='text-[13px] leading-5 text-muted-foreground'>
+                    <span className='font-semibold text-foreground'>{notification.sender?.userName}</span>{' '}
+                    {describe(notification)}
+                  </p>
+                  <span className='mt-0.5 block text-[11px] text-muted-foreground'>{timeAgo(notification.createdAt)}</span>
+                </div>
 
-              {notification.post &&
-                <div className='size-11 shrink-0 overflow-hidden rounded-lg ring-1 ring-border'>
-                  <img
-                    src={notification.post.mediaType === "video" ? posterFor(notification.post.media) : notification.post.media}
-                    className='size-full object-cover'
-                  />
-                </div>}
-            </button>
-          ))}
+                {thumbnail &&
+                  <div className='size-11 shrink-0 overflow-hidden rounded-lg ring-1 ring-border'>
+                    <img src={thumbnail} className='size-full object-cover' />
+                  </div>}
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>
