@@ -242,7 +242,7 @@ function LoopCard({ loopData }) {
         </div>
 
         {loopData.caption &&
-          <p className='pr-14 text-[13px] leading-5 text-background/90 wrap-break-words'>{loopData.caption}</p>}
+          <p className='pr-14 text-[13px] leading-5 break-words text-background/90'>{loopData.caption}</p>}
       </div>
 
       {/* progress bar — padded wrapper gives the thin track a usable touch target */}
