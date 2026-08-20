@@ -1,23 +1,25 @@
 import http from "http";
 import express from "express";
+import dotenv from "dotenv";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { parseCookie } from "cookie";
 
+//imports are evaluated before the importing module's body, so index.js calling
+//dotenv.config() is too late for anything read at module level here
+dotenv.config();
+
 const app = express();
 const server = http.createServer(app);
 
+export const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: clientUrl,
         credentials: true
     }
 });
-
-//maps a logged in user's id to their active socket id
-const userSocketMap = {};
-
-export const getReceiverSocketId = (userId) => userSocketMap[userId];
 
 io.use((socket, next) => {
     try {
@@ -36,15 +38,28 @@ io.use((socket, next) => {
     }
 });
 
+//a room per user rather than a userId -> socketId map: a second tab used to
+//overwrite the first, and closing either one then marked the user offline and
+//cut off both
+const onlineUsers = () => {
+    const { rooms, sids } = io.sockets.adapter;
+    //every socket also sits in a room named after its own id — those are not users
+    return [...rooms.keys()].filter(room => !sids.has(room));
+}
+
+//delivers to every tab the user has open, and is a no-op when they are offline
+export const emitToUser = (userId, event, payload) => {
+    io.to(userId.toString()).emit(event, payload);
+}
+
 io.on("connection", (socket) => {
-    const userId = socket.userId;
-    userSocketMap[userId] = socket.id;
+    socket.join(socket.userId);
+    io.emit("getOnlineUsers", onlineUsers());
 
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
+    //"disconnect" fires after the socket has left its rooms, so the user's room
+    //is only gone once their last tab has closed
     socket.on("disconnect", () => {
-        delete userSocketMap[userId];
-        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+        io.emit("getOnlineUsers", onlineUsers());
     });
 });
 

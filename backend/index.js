@@ -10,13 +10,13 @@ import loopRouter from "./routes/loop.routes.js";
 import storyRouter from "./routes/story.routes.js";
 import messageRouter from "./routes/message.routes.js";
 import notificationRouter from "./routes/notification.routes.js";
-import { app, server } from "./socket.js";
+import { app, server, clientUrl } from "./socket.js";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin: clientUrl,
     credentials:true
 }));
 app.use(cookieParser());

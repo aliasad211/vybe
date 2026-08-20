@@ -1,6 +1,6 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
-import { getReceiverSocketId, io } from "../socket.js";
+import { emitToUser } from "../socket.js";
 
 //get all conversations for the logged in user, most recently active first
 export const getConversations = async (req, res) => {
@@ -77,10 +77,7 @@ export const sendMessage = async (req, res) => {
         conversation.lastMessage = message._id;
         await conversation.save();
 
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if (receiverSocketId) {
-            io.to(receiverSocketId).emit("newMessage", message);
-        }
+        emitToUser(receiverId, "newMessage", message);
 
         return res.status(201).json(message);
     } catch (error) {
