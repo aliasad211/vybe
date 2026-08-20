@@ -58,7 +58,7 @@ function StoryCard({ storyData }) {
     if (holding) {
       video.pause()
     } else {
-      video.play().catch(() => {})
+      video.play().catch(() => { })
     }
   }, [holding])
 
@@ -79,93 +79,104 @@ function StoryCard({ storyData }) {
   }
 
   return (
-    <div className='w-full lg:w-120 h-dvh bg-black relative flex items-center justify-center overflow-hidden'>
+    <div className='relative flex h-dvh w-full items-center justify-center overflow-hidden bg-foreground lg:w-[420px] lg:rounded-2xl'>
 
       {/* progress bar */}
-      <div className='absolute top-2 left-0 w-full px-3 z-30'>
-        <div className='w-full h-1 bg-white/30 rounded-full'>
-          <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
+      <div className='absolute left-0 top-2.5 z-30 w-full px-3'>
+        <div className='h-1 w-full rounded-full bg-background/25'>
+          <div className='h-full rounded-full bg-background transition-[width] duration-100 ease-linear' style={{ width: `${progress}%` }} />
         </div>
       </div>
 
       {/* author header */}
-      <div className='absolute top-6 left-0 w-full px-3 py-3 flex items-center gap-3 z-30'>
-        <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7 shrink-0' onClick={() => navigate("/")} />
-        <div className='w-9 h-9 border-2 border-white rounded-full overflow-hidden cursor-pointer shrink-0'
+      <div className='absolute left-0 top-6 z-30 flex w-full items-center gap-3 px-3 py-3'>
+        <button aria-label='Back'
+          className='grid size-8 shrink-0 place-items-center rounded-full text-background/80 transition hover:bg-background/10 hover:text-background'
+          onClick={() => navigate("/")}>
+          <IoIosArrowRoundBack className='size-6' />
+        </button>
+        <div className='size-9 shrink-0 cursor-pointer overflow-hidden rounded-full ring-2 ring-background/70'
           onClick={() => navigate(`/profile/${storyData.author?.userName}`)}>
-          <img src={storyData.author?.profileImage || dp} className='w-full h-full object-cover' />
+          <img src={storyData.author?.profileImage || dp} className='size-full object-cover' />
         </div>
-        <span className='text-white font-semibold truncate cursor-pointer'
+        <span className='min-w-0 truncate text-sm font-semibold text-background'
           onClick={() => navigate(`/profile/${storyData.author?.userName}`)}>
           {storyData.author?.userName}
         </span>
-        <span className='text-white/70 text-[13px] shrink-0'>{timeAgo(storyData.createdAt)}</span>
+        <span className='shrink-0 text-[11px] text-background/60'>{timeAgo(storyData.createdAt)}</span>
       </div>
 
       {/* media — press and hold anywhere on it to pause */}
       <div
-        className='w-full h-full flex items-center justify-center touch-none'
+        className='flex size-full touch-none items-center justify-center'
         onPointerDown={() => setPaused(true)}
         onPointerUp={() => setPaused(false)}
         onPointerCancel={() => setPaused(false)}
         onPointerLeave={() => setPaused(false)}
       >
         {isImage
-          ? <img src={storyData.media} className='w-full h-full object-contain' onError={handleError} />
+          ? <img src={storyData.media} className='size-full object-contain' onError={handleError} />
           : <video
-              ref={videoTag}
-              src={storyData.media}
-              poster={posterFor(storyData.media)}
-              autoPlay
-              muted={mute}
-              playsInline
-              preload='auto'
-              className='w-full h-full object-contain'
-              onTimeUpdate={handleTimeUpdate}
-              onEnded={() => navigate("/")}
-              onError={handleError}
-            />}
+            ref={videoTag}
+            src={storyData.media}
+            poster={posterFor(storyData.media)}
+            autoPlay
+            muted={mute}
+            playsInline
+            preload='auto'
+            className='size-full object-contain'
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={() => navigate("/")}
+            onError={handleError}
+          />}
       </div>
 
       {failed &&
-        <div className='absolute inset-0 flex items-center justify-center text-white text-[14px] bg-black/70 z-20'>
-          story could not be loaded
+        <div className='absolute inset-0 z-20 grid place-items-center bg-foreground/80 text-sm text-background'>
+          Story could not be loaded
         </div>}
 
       {!isImage &&
-        <div className='absolute bottom-24 right-4 z-30' onClick={() => setMute(prev => !prev)}>
-          {mute
-            ? <IoMdVolumeOff className='w-6 h-6 text-white cursor-pointer' />
-            : <IoMdVolumeHigh className='w-6 h-6 text-white cursor-pointer' />}
-        </div>}
+        <button aria-label='Toggle sound'
+          className='absolute bottom-24 right-4 z-30 grid size-9 place-items-center rounded-full bg-background/15 text-background backdrop-blur transition hover:bg-background/25'
+          onClick={() => setMute(prev => !prev)}>
+          {mute ? <IoMdVolumeOff className='size-5' /> : <IoMdVolumeHigh className='size-5' />}
+        </button>}
 
       {/* only the author gets to see who watched */}
       {isOwnStory &&
-        <div className='absolute bottom-6 left-0 w-full px-5 flex items-center gap-2 z-30 cursor-pointer'
+        <button className='absolute bottom-6 left-0 z-30 flex w-full items-center gap-2 px-5 text-background'
           onClick={() => setShowViewers(true)}>
-          <FaEye className='w-5 h-5 text-white' />
-          <span className='text-white text-[15px]'>{storyData.viewers?.length || 0}</span>
-        </div>}
+          <FaEye className='size-4' />
+          <span className='text-sm font-semibold'>{storyData.viewers?.length || 0}</span>
+        </button>}
 
       {/* viewer sheet */}
       {isOwnStory &&
-        <div className={`absolute bottom-0 left-0 w-full h-[55%] bg-white rounded-t-2xl z-40 flex flex-col transition-transform duration-300 ${showViewers ? "translate-y-0" : "translate-y-full"}`}>
-          <div className='w-full flex justify-between items-center px-5 py-3 border-b border-gray-200'>
-            <span className='font-semibold'>Viewers ({storyData.viewers?.length || 0})</span>
-            <IoClose className='w-6 h-6 cursor-pointer' onClick={() => setShowViewers(false)} />
+        <div className={`absolute bottom-0 left-0 z-40 flex h-[55%] w-full flex-col rounded-t-2xl bg-card transition-transform duration-300 ${showViewers ? "translate-y-0" : "translate-y-full"}`}>
+          <div className='flex items-center justify-between border-b border-border/70 px-5 py-3.5'>
+            <span className='font-display text-sm font-semibold text-foreground'>Viewers ({storyData.viewers?.length || 0})</span>
+            <button aria-label='Close'
+              className='grid size-8 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground'
+              onClick={() => setShowViewers(false)}>
+              <IoClose className='size-5' />
+            </button>
           </div>
 
-          <div className='w-full flex-1 overflow-auto flex flex-col gap-2.5 px-5 py-3'>
+          <div className='flex flex-1 flex-col gap-3 overflow-auto px-5 py-4 hide-scrollbar'>
             {!storyData.viewers?.length &&
-              <div className='w-full text-center text-gray-400 text-[14px] mt-5'>No views yet</div>}
+              <p className='pt-4 text-center text-xs text-muted-foreground'>No views yet</p>}
             {storyData.viewers?.map(viewer =>
-              <div key={viewer._id} className='w-full flex items-center gap-2.5 border-b border-gray-200 pb-1.5 cursor-pointer'
+              <button key={viewer._id} className='flex items-center gap-3 text-left'
                 onClick={() => navigate(`/profile/${viewer.userName}`)}>
-                <div className='w-9 h-9 border border-black rounded-full overflow-hidden shrink-0'>
-                  <img src={viewer.profileImage || dp} className='w-full h-full object-cover' />
+                <div className='size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-border'>
+                  <img src={viewer.profileImage || dp} className='size-full object-cover' />
                 </div>
-                <span className='font-semibold text-[14px]'>{viewer.userName}</span>
-              </div>
+                <div className='min-w-0'>
+                  <div className='truncate text-sm font-semibold text-foreground'>{viewer.userName}</div>
+                  <div className='mt-0.5 truncate text-[11px] text-muted-foreground'>{viewer.name}</div>
+                </div>
+              </button>
             )}
           </div>
         </div>}

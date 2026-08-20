@@ -65,17 +65,22 @@ function Story() {
   }, [currentStory?._id])
 
   return (
-    <div className='w-full h-dvh bg-black flex justify-center items-center'>
+    <div className='flex h-dvh w-full items-center justify-center bg-foreground'>
       {loading
-        ? <ClipLoader size={30} color='white' />
+        ? <ClipLoader size={28} color='currentColor' />
         : currentStory
           ? <StoryCard storyData={currentStory} />
-          : <div className='w-full h-full flex flex-col items-center justify-center gap-5'>
-              <div className='w-full h-15 flex items-center gap-5 px-5 fixed top-2.5 left-0'>
-                <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7' onClick={() => navigate("/")} />
-              </div>
-              <span className='text-white text-[16px]'>No story to show</span>
-            </div>}
+          : <div className='flex size-full flex-col items-center justify-center gap-4'>
+            <div className='fixed left-0 top-3 flex h-14 w-full items-center px-4'>
+              <button aria-label='Back'
+                className='grid size-9 place-items-center rounded-full text-background/80 transition hover:bg-background/10 hover:text-background'
+                onClick={() => navigate("/")}>
+                <IoIosArrowRoundBack className='size-6' />
+              </button>
+            </div>
+            <p className='font-display text-base font-semibold text-background'>No story to show</p>
+            <p className='text-xs text-background/60'>This story may have expired.</p>
+          </div>}
     </div>
   )
 }

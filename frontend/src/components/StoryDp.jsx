@@ -1,12 +1,13 @@
 import React from 'react'
 import dp from "../assets/dp.jfif";
 import { useSelector } from 'react-redux'
-import { BiPlusCircle } from "react-icons/bi";
+import { BiPlus } from "react-icons/bi";
 import { useNavigate } from 'react-router-dom';
+import { storyTone } from '../utils/tone';
 
-function StoryDp({profileImage, userName, story}) {
+function StoryDp({ profileImage, userName, story }) {
     const navigate = useNavigate();
-    const {userData} = useSelector(state=>state.user);
+    const { userData } = useSelector(state => state.user);
 
     const isOwn = userName === "Your Story";
 
@@ -15,36 +16,38 @@ function StoryDp({profileImage, userName, story}) {
         viewer => (viewer?._id || viewer)?.toString() === userData?._id
     );
 
-    const handleClick = ()=>{
-        if(isOwn){
+    const handleClick = () => {
+        if (isOwn) {
             //no story yet — the ring doubles as the "add story" button
             navigate(story ? `/story/${userData?.userName}` : "/upload")
-        }else{
+        } else {
             navigate(`/story/${userName}`)
         }
     }
 
-    //an unseen story gets the bright ring, a seen one fades to grey
-    const ring = !story
-        ? ""
+    //the ring carries the state: dashed for your own empty slot, a tinted
+    //gradient while unseen, and a flat border once watched
+    const ring = isOwn && !story
+        ? "story-self"
         : seen
-            ? "bg-linear-to-b from-gray-500 to-gray-700"
-            : "bg-linear-to-b from-blue-500 to-blue-900"
+            ? "story-seen"
+            : storyTone(story?.author?._id || userData?._id)
 
     return (
-        <div className='flex flex-col items-center w-20 shrink-0'>
-            <div className={`w-18 h-18 ${ring} rounded-full flex justify-center items-center relative`} onClick={handleClick}>
-            <div className='w-16 h-16 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
-                <img src={ profileImage || dp} className='w-full h-full object-cover' />
+        <button className='flex w-16 shrink-0 flex-col items-center gap-1.5' onClick={handleClick}>
+            <div className={`relative grid size-16 place-items-center rounded-full p-[3px] ${ring}`}>
+                <span className='block size-full overflow-hidden rounded-full border-[3px] border-background bg-surface'>
+                    <img src={profileImage || dp} className='size-full object-cover' />
+                </span>
+                {isOwn && !story &&
+                    <span className='absolute -bottom-0.5 -right-0.5 grid size-5 place-items-center rounded-full border-2 border-background bg-primary text-primary-foreground'>
+                        <BiPlus className='size-3' />
+                    </span>}
             </div>
-            {!story && isOwn &&
-                <div className='absolute bottom-2 right-2'><BiPlusCircle className='w-5 h-5 text-white cursor-pointer'/></div>
-                }
-            </div>
-            <div className='text-[14px] text-center truncate w-full text-white'>
-              {userName}
-            </div>
-        </div>
+            <span className={`w-full truncate text-center text-[11px] ${seen ? "font-medium text-muted-foreground" : "font-semibold text-foreground"}`}>
+                {userName}
+            </span>
+        </button>
     )
 }
 
