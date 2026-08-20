@@ -1,6 +1,7 @@
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Loop from "../models/loop.model.js"
 import User from "../models/user.model.js";
+import { createNotification, removeNotification } from "./notification.controllers.js";
 
 //upload loop controller
 export const uploadLoop = async (req, res) => {
@@ -64,6 +65,13 @@ export const like = async (req, res) => {
         }
         
         await loop.save();
+
+        if (isLiked) {
+            await removeNotification({ recipient: loop.author, sender: req.userId, type: "like", loop: loop._id });
+        } else {
+            await createNotification({ recipient: loop.author, sender: req.userId, type: "like", loop: loop._id });
+        }
+
         await loop.populate("author", "name userName profileImage");
         await loop.populate("comments.author", "name userName profileImage");
         return res.status(200).json(loop);
@@ -87,6 +95,9 @@ export const comment = async (req, res) => {
         })
 
         await loop.save();
+
+        await createNotification({ recipient: loop.author, sender: req.userId, type: "comment", loop: loop._id });
+
         await loop.populate("author", "name userName profileImage");
         await loop.populate("comments.author", "name userName profileImage");
         return res.status(200).json(loop);
