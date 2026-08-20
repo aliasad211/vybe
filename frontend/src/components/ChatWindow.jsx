@@ -44,25 +44,32 @@ function ChatWindow() {
   const isOnline = onlineUsers.includes(selectedUser._id)
 
   return (
-    <div className='w-full h-screen flex flex-col'>
-      <div className='w-full flex items-center gap-2.5 p-5 border-b-2 border-gray-700'>
-        <IoIosArrowRoundBack className='text-white w-7 h-7 cursor-pointer' onClick={() => dispatch(setSelectedUser(null))} />
-        <div className='w-10 h-10 border-2 border-black rounded-full overflow-hidden'>
-          <img src={selectedUser.profileImage || dp} className='w-full h-full object-cover' />
+    <div className='flex h-full w-full flex-col'>
+
+      <div className='flex h-[72px] shrink-0 items-center gap-3 border-b border-border/70 px-4'>
+        <button aria-label='Back'
+          className='grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground'
+          onClick={() => dispatch(setSelectedUser(null))}>
+          <IoIosArrowRoundBack className='size-6' />
+        </button>
+        <div className='size-10 shrink-0 overflow-hidden rounded-full ring-1 ring-border'>
+          <img src={selectedUser.profileImage || dp} className='size-full object-cover' />
         </div>
-        <div>
-          <div className='text-white text-[16px] font-semibold'>{selectedUser.userName}</div>
-          <div className='text-[12px] text-gray-400'>{isOnline ? "Online" : "Offline"}</div>
+        <div className='min-w-0'>
+          <div className='truncate text-sm font-semibold text-foreground'>{selectedUser.userName}</div>
+          <div className='mt-0.5 text-[11px] text-muted-foreground'>{isOnline ? "Online" : "Offline"}</div>
         </div>
       </div>
 
-      <div className='flex-1 overflow-y-auto flex flex-col gap-2.5 p-5'>
+      <div className='flex flex-1 flex-col gap-2 overflow-y-auto p-4 hide-scrollbar'>
         {messages?.map((message, index) => {
           const isOwn = message.sender === userData._id
           return (
             <div
               key={message._id || index}
-              className={`max-w-[75%] px-3.5 py-2 rounded-2xl text-[14px] break-words ${isOwn ? "self-end bg-blue-600 text-white" : "self-start bg-gray-800 text-white"}`}
+              className={`max-w-[78%] break-words rounded-2xl px-3.5 py-2 text-[13px] leading-5 ${isOwn
+                ? "self-end bg-primary text-primary-foreground"
+                : "self-start bg-muted text-foreground"}`}
             >
               {message.text}
             </div>
@@ -71,17 +78,18 @@ function ChatWindow() {
         <div ref={bottomRef} />
       </div>
 
-      <div className='w-full flex items-center gap-2.5 p-5 border-t-2 border-gray-700'>
+      <div className='flex shrink-0 items-center gap-2.5 border-t border-border/70 p-4'>
         <input
           type='text'
           placeholder='Message...'
-          className='flex-1 h-10 px-3.5 rounded-full bg-gray-800 text-white outline-none'
+          className='h-10 min-w-0 flex-1 rounded-full bg-muted px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring'
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
-        <button className='cursor-pointer disabled:opacity-40' onClick={handleSend} disabled={!text.trim()}>
-          <IoSend className='text-white w-6 h-6' />
+        <button className='grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition hover:opacity-90 disabled:opacity-40'
+          onClick={handleSend} disabled={!text.trim()}>
+          <IoSend className='size-4' />
         </button>
       </div>
     </div>
