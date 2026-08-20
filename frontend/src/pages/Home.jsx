@@ -5,10 +5,10 @@ import Feed from '../components/Feed'
 
 function Home() {
   return (
-    <div className='w-full flex justify-center items-center'>
-        <LeftHome/>
-        <Feed/>
-        <RightHome/>
+    <div className='flex min-h-screen w-full bg-background'>
+      <LeftHome />
+      <Feed />
+      <RightHome />
     </div>
   )
 }

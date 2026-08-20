@@ -7,9 +7,9 @@ function RightHome() {
   const { selectedUser } = useSelector(state => state.message)
 
   return (
-    <div className='w-[25%] hidden lg:block min-h-screen bg-black border-l-2 border-gray-700'>
-        {selectedUser ? <ChatWindow/> : <ConversationList/>}
-    </div>
+    <aside className='hidden h-screen w-[26%] shrink-0 border-l border-border/70 bg-sidebar lg:block'>
+      {selectedUser ? <ChatWindow /> : <ConversationList />}
+    </aside>
   )
 }
 
