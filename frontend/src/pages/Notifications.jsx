@@ -24,9 +24,9 @@ const typeText = {
 }
 
 const typeIcon = {
-  like: <FaHeart className='text-red-500 w-3 h-3' />,
-  comment: <FaRegComment className='text-blue-400 w-3 h-3' />,
-  follow: <FaUserPlus className='text-green-400 w-3 h-3' />
+  like: <FaHeart className='size-2.5 text-notification' />,
+  comment: <FaRegComment className='size-2.5 text-primary' />,
+  follow: <FaUserPlus className='size-2.5 text-emerald-500' />
 }
 
 function Notifications() {
@@ -49,46 +49,60 @@ function Notifications() {
   }, [dispatch])
 
   return (
-    <div className='w-full min-h-screen bg-black text-white'>
-      <div className='w-full h-20 flex items-center gap-5 px-5'>
-        <IoIosArrowRoundBack className='w-7 h-7 cursor-pointer' onClick={() => navigate("/")} />
-        <div className='font-semibold text-[20px]'>Notifications</div>
-      </div>
+    <div className='min-h-screen w-full bg-background'>
 
-      {notifications?.length === 0 &&
-        <div className='text-gray-400 text-center mt-10'>No notifications yet.</div>}
+      <header className='sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-border/70 bg-background/90 px-4 backdrop-blur-xl sm:px-6'>
+        <button aria-label='Back'
+          className='grid size-9 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground'
+          onClick={() => navigate("/")}>
+          <IoIosArrowRoundBack className='size-6' />
+        </button>
+        <h1 className='font-display text-xl font-semibold text-foreground'>Notifications</h1>
+      </header>
 
-      <div className='w-full flex flex-col'>
-        {notifications?.map((notification) => (
-          <div
-            key={notification._id}
-            className={`w-full flex items-center gap-3.5 px-5 py-3.5 border-b border-gray-800 cursor-pointer ${!notification.seen ? "bg-gray-900" : ""}`}
-            onClick={() => navigate(`/profile/${notification.sender?.userName}`)}
-          >
-            <div className='relative w-12 h-12 shrink-0'>
-              <div className='w-12 h-12 border-2 border-black rounded-full overflow-hidden'>
-                <img src={notification.sender?.profileImage || dp} className='w-full h-full object-cover' />
+      <div className='mx-auto w-full max-w-[640px] px-4 py-5 sm:px-6'>
+        {!notifications?.length &&
+          <div className='rounded-2xl border border-border/70 bg-card p-8 text-center'>
+            <p className='font-display text-base font-semibold text-foreground'>Nothing yet</p>
+            <p className='mt-1 text-xs leading-5 text-muted-foreground'>Likes, comments and new followers will show up here.</p>
+          </div>}
+
+        <div className='flex flex-col gap-2'>
+          {notifications?.map((notification) => (
+            <button
+              key={notification._id}
+              className={`flex w-full items-center gap-3.5 rounded-2xl border px-3.5 py-3 text-left transition hover:bg-accent/50 ${notification.seen
+                ? "border-border/70 bg-card"
+                : "border-primary/30 bg-accent/60"}`}
+              onClick={() => navigate(`/profile/${notification.sender?.userName}`)}
+            >
+              <div className='relative size-11 shrink-0'>
+                <div className='size-11 overflow-hidden rounded-full ring-1 ring-border'>
+                  <img src={notification.sender?.profileImage || dp} className='size-full object-cover' />
+                </div>
+                <span className='absolute -bottom-0.5 -right-0.5 grid size-5 place-items-center rounded-full border-2 border-card bg-card'>
+                  {typeIcon[notification.type]}
+                </span>
               </div>
-              <div className='absolute -bottom-1 -right-1 w-5 h-5 bg-black border border-gray-700 rounded-full flex items-center justify-center'>
-                {typeIcon[notification.type]}
+
+              <div className='min-w-0 flex-1'>
+                <p className='text-[13px] leading-5 text-muted-foreground'>
+                  <span className='font-semibold text-foreground'>{notification.sender?.userName}</span>{' '}
+                  {typeText[notification.type]}
+                </p>
+                <span className='mt-0.5 block text-[11px] text-muted-foreground'>{timeAgo(notification.createdAt)}</span>
               </div>
-            </div>
 
-            <div className='flex-1'>
-              <span className='font-semibold'>{notification.sender?.userName}</span>{' '}
-              <span className='text-gray-300'>{typeText[notification.type]}</span>
-              <div className='text-gray-500 text-[13px]'>{timeAgo(notification.createdAt)}</div>
-            </div>
-
-            {notification.post &&
-              <div className='w-12 h-12 rounded-md overflow-hidden shrink-0'>
-                <img
-                  src={notification.post.mediaType === "video" ? posterFor(notification.post.media) : notification.post.media}
-                  className='w-full h-full object-cover'
-                />
-              </div>}
-          </div>
-        ))}
+              {notification.post &&
+                <div className='size-11 shrink-0 overflow-hidden rounded-lg ring-1 ring-border'>
+                  <img
+                    src={notification.post.mediaType === "video" ? posterFor(notification.post.media) : notification.post.media}
+                    className='size-full object-cover'
+                  />
+                </div>}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )
