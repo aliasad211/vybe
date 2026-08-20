@@ -9,18 +9,23 @@ function Loop() {
     const { loopData } = useSelector(state => state.loop);
 
     return (
-        <div className='w-full h-dvh bg-black relative'>
+        <div className='relative h-dvh w-full bg-foreground'>
 
-            <div className='w-full h-15 flex items-center gap-5 px-5 fixed top-2.5 left-0 z-30'>
-                <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7' onClick={() => navigate("/")} />
-                <h1 className='text-white text-[20px] font-semibold'>Loops</h1>
+            <div className='fixed left-0 top-2.5 z-30 flex h-14 w-full items-center gap-3 px-4'>
+                <button aria-label='Back'
+                    className='grid size-9 place-items-center rounded-full text-background/80 backdrop-blur transition hover:bg-background/10 hover:text-background'
+                    onClick={() => navigate("/")}>
+                    <IoIosArrowRoundBack className='size-6' />
+                </button>
+                <h1 className='font-display text-xl font-semibold text-background'>Loops</h1>
             </div>
 
-            <div className='w-full h-full overflow-y-scroll snap-y snap-mandatory flex flex-col items-center'>
+            <div className='flex h-full w-full snap-y snap-mandatory flex-col items-center overflow-y-scroll hide-scrollbar'>
                 {loopData?.length > 0
                     ? loopData.map(loop => <LoopCard key={loop._id} loopData={loop} />)
-                    : <div className='w-full h-full flex items-center justify-center text-white text-[16px]'>
-                        No loops yet
+                    : <div className='flex h-full w-full flex-col items-center justify-center gap-1'>
+                        <p className='font-display text-base font-semibold text-background'>No loops yet</p>
+                        <p className='text-xs text-background/60'>Share the first one from Create.</p>
                     </div>}
             </div>
 
