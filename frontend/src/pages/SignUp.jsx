@@ -1,24 +1,16 @@
 import React from 'react';
-import logo from "../assets/logo.png";
-import logo2 from "../assets/logo2.png";
-import { IoIosEye } from "react-icons/io";
-import { IoIosEyeOff } from "react-icons/io";
+import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 import { ClipLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import axios from 'axios';
 import { useState } from 'react';
-import { use } from 'react';
 import { serverUrl } from '../App';
 import { useDispatch } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
 
+const field = 'h-12 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring'
+
 function SignUp() {
-   const [inputClicked, setInputClicked] = useState({
-    name:false,
-    userName: false,
-    email:false,
-    password:false
-   });
    const [showPassword, setShowPassword] = useState(false);
    const [name, setName] = useState("");
    const [userName, setUserName] = useState("");
@@ -28,102 +20,91 @@ function SignUp() {
    const [loading, setLoading] = useState(false);
    const dispatch = useDispatch();
 
-   const handleSignup = async()=>{
-    setLoading(true);
-    setErr("");
-    try{
-     const response = await axios.post(
-        `${serverUrl}/api/auth/signup`,
-        {name, userName, email, password},
-        {withCredentials:true}
-    )
-    dispatch(setUserData(response.data));
-    console.log(response.data);
-    setLoading(false)
-    }catch(error){
-       setErr(error.response?.data?.message);
-       console.log(error);
-       setLoading(false);
-    }
+   const handleSignup = async () => {
+      setLoading(true);
+      setErr("");
+      try {
+         const response = await axios.post(
+            `${serverUrl}/api/auth/signup`,
+            { name, userName, email, password },
+            { withCredentials: true }
+         )
+         dispatch(setUserData(response.data));
+         setLoading(false)
+      } catch (error) {
+         setErr(error.response?.data?.message);
+         setLoading(false);
+      }
    }
 
-  return (
-    <div className='w-full h-screen bg-linear-to-b from-black to-gray-900 flex flex-col justify-center items-center'>
-        <div className='w-[90%] lg:max-w-[60%] h-150 bg-white rounded-2xl flex justify-center items-center overflow-hidden border-2 border-[#1a1f23]'>
-           <div className='w-full lg:w-[50%] h-full bg-white flex flex-col items-center p-2.5 gap-5'>
-               <div className='flex gap-2.5 items-center text-[20px] font-semibold mt-10'>
-                  <span>Sign Up to</span>
-                  <img src={logo} alt='' className='w-17.5'/>
+   return (
+      <div className='flex min-h-dvh w-full items-center justify-center bg-background px-4 py-10'>
+         <div className='grid w-full max-w-[920px] overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_24px_60px_-40px_var(--shadow-color)] lg:grid-cols-2'>
+
+            <div className='flex flex-col justify-center gap-5 p-8 sm:p-10'>
+               <div className='flex items-center gap-2.5'>
+                  <span className='brand-mark grid size-9 place-items-center rounded-xl font-display text-sm font-bold text-primary-foreground'>V</span>
+                  <span className='font-display text-[21px] font-semibold tracking-tight text-foreground'>Vybe</span>
                </div>
 
-               <div 
-               className='relative flex items-center justify-start w-[90%] h-12.5 rounded-2xl mt-7.5 border-2 border-black'
-               onClick={(()=>setInputClicked({...inputClicked, name:true}))}
-               >
-                   <label htmlFor="name" 
-                   className={`text-gray-700 absolute left-5 p-1.25 bg-white text-3.75 ${inputClicked.name ? "-top-4": ""}`}>
-                    Enter Your Name
-                    </label>
-                    <input type='text' id='name' className='w-full h-full rounded-2xl px-5 outline-none border-0' onChange={(e)=>setName(e.target.value)} value={name} required/>
-                   
+               <div>
+                  <h1 className='font-display text-3xl font-semibold tracking-tight text-foreground'>Find your people</h1>
+                  <p className='mt-1 text-sm text-muted-foreground'>Create an account and start sharing.</p>
                </div>
 
-               <div 
-               className='relative flex items-center justify-start w-[90%] h-12.5 rounded-2xl border-2 border-black'
-               onClick={(()=>setInputClicked({...inputClicked, userName:true}))}
-               >
-                   <label htmlFor="userName" 
-                   className={`text-gray-700 absolute left-5 p-1.25 bg-white text-3.75 ${inputClicked.userName ? "-top-4": ""}`}>
-                    Enter User Name
-                    </label>
-                    <input type='text' id='userName' className='w-full h-full rounded-2xl px-5 outline-none border-0' onChange={(e)=>setUserName(e.target.value)} value={userName} required/>
-                   
+               <div className='flex flex-col gap-3.5'>
+                  <input type='text' className={field} placeholder='Your name' onChange={(e) => setName(e.target.value)} value={name} required />
+                  <input type='text' className={field} placeholder='Username' onChange={(e) => setUserName(e.target.value)} value={userName} required />
+                  <input type='email' className={field} placeholder='Email' onChange={(e) => setEmail(e.target.value)} value={email} required />
+
+                  <div className='relative'>
+                     <input
+                        type={showPassword ? "text" : "password"}
+                        className={`${field} pr-12`}
+                        placeholder='Password'
+                        onChange={(e) => setPassword(e.target.value)}
+                        value={password}
+                        onKeyDown={(e) => e.key === "Enter" && handleSignup()}
+                        required
+                     />
+                     <button
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        className='absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground'
+                        onClick={() => setShowPassword(prev => !prev)}
+                     >
+                        {showPassword ? <IoIosEyeOff className='size-4' /> : <IoIosEye className='size-4' />}
+                     </button>
+                  </div>
                </div>
 
-               <div 
-               className='relative flex items-center justify-start w-[90%] h-12.5 rounded-2xl border-2 border-black'
-               onClick={(()=>setInputClicked({...inputClicked, email:true}))}
+               {err && <p className='text-xs font-medium text-destructive'>{err}</p>}
+
+               <button
+                  className='grid h-12 w-full place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60'
+                  onClick={handleSignup} disabled={loading}
                >
-                   <label htmlFor="email" 
-                   className={`text-gray-700 absolute left-5 p-1.25 bg-white text-3.75 ${inputClicked.email ? "-top-4": ""}`}>
-                    Enter Your Email
-                    </label>
-                    <input type='text' id='email' className='w-full h-full rounded-2xl px-5 outline-none border-0' onChange={(e)=>setEmail(e.target.value)} value={email} required/>
-                   
-               </div>
+                  {loading ? <ClipLoader size={22} color='currentColor' /> : "Create account"}
+               </button>
 
-               <div 
-               className='relative flex items-center justify-start w-[90%] h-12.5 rounded-2xl border-2 border-black'
-               onClick={(()=>setInputClicked({...inputClicked, password:true}))}
-               >
-                   <label htmlFor="password" 
-                   className={`text-gray-700 absolute left-5 p-1.25 bg-white text-3.75 ${inputClicked.password ? "-top-4": ""}`}>
-                    Enter Password
-                    </label>
-                    <input type={showPassword ? "text" : "password"} id='password' className='w-full h-full rounded-2xl px-5 outline-none border-0' onChange={(e)=>setPassword(e.target.value)} value={password} required/>
-                   {!showPassword ? 
-                   <IoIosEye className='absolute cursor-pointer right-5 w-6 h-6' onClick={()=>setShowPassword(true)} />
-                   : <IoIosEyeOff className='absolute cursor-pointer right-5 w-6 h-6' onClick={()=>setShowPassword(false)}/>
-                    }
-                </div>
-                {err && <p className='text-red-500'>{err}</p>}
+               <p className='text-center text-xs text-muted-foreground'>
+                  Already have an account?{' '}
+                  <Link to="/signin" className='font-semibold text-primary hover:underline'>Sign in</Link>
+               </p>
+            </div>
 
-                <button className='w-[70%] px-5 py-2.5 bg-black text-white font-semibold h-12.5 cursor-pointer rounded-2xl mt-7.5'
-                onClick={handleSignup} disabled={loading}
-                >
-                {loading ? <ClipLoader size={30} color='white'/> : "Sign Up"}
-                </button>
+            <div className='brand-mark hidden flex-col justify-end gap-2 p-10 lg:flex'>
+               <span className='font-display text-[10px] font-semibold uppercase tracking-[0.2em] text-primary-foreground/70'>Vybe</span>
+               <p className='font-display text-3xl font-semibold leading-tight tracking-tight text-primary-foreground'>
+                  Not just a platform,<br />it&apos;s a Vybe.
+               </p>
+               <p className='mt-1 text-sm text-primary-foreground/80'>
+                  Share posts, loops and stories with the people who matter.
+               </p>
+            </div>
 
-                <p className='cursor-pointer text-gray-800'>Already Have an account ? <span className='border-b-2 border-b-black pb-0.5 text-black'><Link to="/signin">Sign In</Link></span></p>
-
-           </div>
-           <div className='md:w-[50%] h-full hidden lg:flex justify-center items-center bg-[#000000] flex-col gap-2.5 text-white text-[16px] font-semibold rounded-l-[30px] shadow-2xl shadow-black'>
-               <img src={logo2} alt="" className='w-[50%]' />
-               <p>Not Just A Platform, It's A VYBE</p>
-           </div>
-        </div>
-    </div>
-  )
+         </div>
+      </div>
+   )
 }
 
 export default SignUp
