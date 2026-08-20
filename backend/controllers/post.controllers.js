@@ -1,7 +1,7 @@
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
-import { createNotification } from "./notification.controllers.js";
+import { createNotification, removeNotification } from "./notification.controllers.js";
 
 //upload post controller
 export const uploadPost = async (req, res) => {
@@ -68,7 +68,11 @@ export const like = async (req, res) => {
 
         await post.save();
 
-        if (!isLiked) {
+        //the like is a toggle, so the notification is too — otherwise unliking
+        //leaves a "liked your post" behind, and re-liking stacks up another
+        if (isLiked) {
+            await removeNotification({ recipient: post.author, sender: req.userId, type: "like", post: post._id });
+        } else {
             await createNotification({ recipient: post.author, sender: req.userId, type: "like", post: post._id });
         }
 
