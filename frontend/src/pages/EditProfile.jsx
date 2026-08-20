@@ -8,6 +8,8 @@ import axios from 'axios';
 import { serverUrl } from '../App';
 import { setProfileData, setUserData } from '../redux/userSlice';
 
+const field = 'h-12 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring'
+
 function EditProfile() {
     const { userData } = useSelector(state => state.user);
     const navigate = useNavigate();
@@ -42,38 +44,55 @@ function EditProfile() {
             }
 
             const response = await axios.post(`${serverUrl}/api/user/editProfile`, formdata, { withCredentials: true })
-            console.log("this response:", response.data);
             dispatch(setProfileData(response.data.user));
             dispatch(setUserData(response.data.user));
             setLoading(false);
             navigate(`/profile/${response.data.user.userName}`);
-            
+
         } catch (error) {
             setLoading(false);
             console.log(error);
         }
     }
+
     return (
-        <div className='w-full min-h-screen bg-black flex items-center flex-col gap-5'>
-            <div className='w-full h-15 flex items-center gap-5 px-5'>
-                <IoIosArrowRoundBack className='text-white cursor-pointer w-7 h-7' onClick={() => navigate(`/profile/${userData.userName}`)} />
-                <h1 className='text-white text-[20px] font-semibold'>Edit Profile</h1>
+        <div className='min-h-screen w-full bg-background'>
+
+            <header className='sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-border/70 bg-background/90 px-4 backdrop-blur-xl sm:px-6'>
+                <button aria-label='Back'
+                    className='grid size-9 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground'
+                    onClick={() => navigate(`/profile/${userData.userName}`)}>
+                    <IoIosArrowRoundBack className='size-6' />
+                </button>
+                <h1 className='font-display text-xl font-semibold text-foreground'>Edit profile</h1>
+            </header>
+
+            <div className='mx-auto w-full max-w-[520px] px-4 py-8 sm:px-6'>
+
+                <div className='flex flex-col items-center gap-3'>
+                    <button className='size-24 overflow-hidden rounded-full ring-2 ring-border transition hover:ring-primary'
+                        onClick={() => imageInput.current.click()}>
+                        <input type='file' accept='image/*' ref={imageInput} hidden onChange={handleImage} />
+                        <img src={frontendImage} className='size-full object-cover' />
+                    </button>
+                    <button className='text-xs font-semibold text-primary' onClick={() => imageInput.current.click()}>
+                        Change profile picture
+                    </button>
+                </div>
+
+                <div className='mt-8 flex flex-col gap-3.5'>
+                    <input type='text' className={field} placeholder='Your name' onChange={(e) => setName(e.target.value)} value={name} />
+                    <input type='text' className={field} placeholder='Username' onChange={(e) => setUserName(e.target.value)} value={userName} />
+                    <input type='text' className={field} placeholder='Bio' onChange={(e) => setBio(e.target.value)} value={bio} />
+                    <input type='text' className={field} placeholder='Profession' onChange={(e) => setProfession(e.target.value)} value={profession} />
+                    <input type='text' className={field} placeholder='Gender' onChange={(e) => setGender(e.target.value)} value={gender} />
+                </div>
+
+                <button className='mt-7 grid h-12 w-full place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60'
+                    onClick={handleEditProfile} disabled={loading}>
+                    {loading ? <ClipLoader size={22} color='currentColor' /> : "Save profile"}
+                </button>
             </div>
-            <div className='w-20 h-20 md:w-25 md:h-25 border-2 border-black rounded-full cursor-pointer overflow-hidden'
-                onClick={() => imageInput.current.click()}
-            >
-                <input type='file' accept='image/*' ref={imageInput} hidden onChange={handleImage} />
-                <img src={frontendImage} className='w-full h-full object-cover' />
-            </div>
-            <div className='text-blue-500 text-center cursor-pointer text-[16px] font-semibold' onClick={() => imageInput.current.click()}>
-                Change Your Profile Picture
-            </div>
-            <input type='text' className='w-[90%] max-w-150 h-15 bg-[#0a1010] border-2 text-white font-semibold border-gray-700 rounded-2xl px-5 outline-none' placeholder='Your Name' onChange={(e) => setName(e.target.value)} value={name} />
-            <input type='text' className='w-[90%] max-w-150 h-15 bg-[#0a1010] border-2 text-white font-semibold border-gray-700 rounded-2xl px-5 outline-none' placeholder='@UserName' onChange={(e) => setUserName(e.target.value)} value={userName} />
-            <input type='text' className='w-[90%] max-w-150 h-15 bg-[#0a1010] border-2 text-white font-semibold border-gray-700 rounded-2xl px-5 outline-none' placeholder='Bio' onChange={(e) => setBio(e.target.value)} value={bio} />
-            <input type='text' className='w-[90%] max-w-150 h-15 bg-[#0a1010] border-2 text-white font-semibold border-gray-700 rounded-2xl px-5 outline-none' placeholder='Profession' onChange={(e) => setProfession(e.target.value)} value={profession} />
-            <input type='text' className='w-[90%] max-w-150 h-15 bg-[#0a1010] border-2 text-white font-semibold border-gray-700 rounded-2xl px-5 outline-none' placeholder='Gender' onChange={(e) => setGender(e.target.value)} value={gender} />
-            <button className='px-2.5 w-[60%] max-w-100 py-1 h-13 bg-white cursor-pointer rounded-2xl' onClick={handleEditProfile} disabled={loading}>{loading ? <ClipLoader size={30} color='black' /> : "Save Profile"}</button>
         </div>
     )
 }
