@@ -18,6 +18,7 @@ import useSocket from './hooks/useSocket'
 import getNotifications from './hooks/getNotifications'
 import Story from './pages/Story'
 import Notifications from './pages/Notifications'
+import Messages from './pages/Messages'
 export const serverUrl = "http://localhost:8000";
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
       <Route path='/loops' element={userData?<Loops/>:<Navigate to={"/signin"}/>}/>
       <Route path='/story/:userName' element={userData?<Story/>:<Navigate to={"/signin"}/>}/>
       <Route path='/notifications' element={userData?<Notifications/>:<Navigate to={"/signin"}/>}/>
+      <Route path='/messages' element={userData?<Messages/>:<Navigate to={"/signin"}/>}/>
     </Routes>
   )
 }
