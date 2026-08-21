@@ -1,14 +1,18 @@
 import React from 'react'
 import LeftHome from '../components/LeftHome'
-import RightHome from '../components/RightHome'
 import Feed from '../components/Feed'
+import Nav from '../components/Nav'
+import TopBar from '../components/TopBar'
 
 function Home() {
   return (
-    <div className='flex min-h-screen w-full bg-background'>
+    <div className='flex min-h-svh w-full bg-background'>
       <LeftHome />
-      <Feed />
-      <RightHome />
+      <div className='flex min-h-svh min-w-0 flex-1 flex-col'>
+        <TopBar crumb='Home' trail='All posts' />
+        <Feed />
+        <Nav />
+      </div>
     </div>
   )
 }
