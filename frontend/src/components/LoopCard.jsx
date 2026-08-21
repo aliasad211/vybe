@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
-import dp from "../assets/dp.jfif"
+import Avatar from './Avatar'
 import { GoHeart, GoHeartFill } from "react-icons/go"
 import { MdOutlineInsertComment } from "react-icons/md"
 import { IoMdVolumeHigh, IoMdVolumeOff } from "react-icons/io"
 import { IoSend, IoClose } from "react-icons/io5"
+import { FiPlay, FiPause, FiBookmark } from "react-icons/fi"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { serverUrl } from '../App'
@@ -12,22 +13,37 @@ import { setLoopData } from '../redux/loopSlice'
 import { toggleFollow } from '../redux/userSlice'
 import { posterFor } from './VideoPlayer'
 
-function LoopCard({ loopData }) {
+const duration = (seconds) => {
+  if (!seconds || !isFinite(seconds)) return null
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${String(s).padStart(2, "0")}`
+}
+
+//one rail button: the circle, and the count under it when there is one
+function RailButton({ label, value, onClick, children }) {
+  return (
+    <button type='button' className='flex flex-col items-center gap-1 transition hover:scale-110' aria-label={label} onClick={onClick}>
+      <span className='grid size-10 place-items-center rounded-full bg-foreground/35 backdrop-blur'>{children}</span>
+      {value !== undefined && <span className='text-[10px] font-semibold'>{value}</span>}
+    </button>
+  )
+}
+
+function LoopCard({ loopData, muted, onToggleMute }) {
   const { userData, following } = useSelector(state => state.user)
   const allLoops = useSelector(state => state.loop.loopData)
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const videoTag = useRef()
   const cardRef = useRef()
-  const barRef = useRef()
 
-  const [mute, setMute] = useState(true)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [paused, setPaused] = useState(false)
   const [failed, setFailed] = useState(false)
   const [showComment, setShowComment] = useState(false)
   const [message, setMessage] = useState("")
+  const [length, setLength] = useState(null)
   const [progress, setProgress] = useState(0)
-  const [seeking, setSeeking] = useState(false)
   const [burst, setBurst] = useState(0)   // bumped on every double tap; 0 = hidden
 
   const clickTimer = useRef(null)
@@ -42,12 +58,11 @@ function LoopCard({ loopData }) {
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        video.muted = true
-        video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+        video.play().then(() => setPaused(false)).catch(() => setPaused(true))
       } else {
         video.pause()
         video.currentTime = 0
-        setIsPlaying(false)
+        setPaused(true)
         setProgress(0)
       }
     }, { threshold: 0.6 })
@@ -64,11 +79,11 @@ function LoopCard({ loopData }) {
   const togglePlay = () => {
     const video = videoTag.current
     if (!video) return
-    if (isPlaying) {
-      video.pause()
-      setIsPlaying(false)
+    if (video.paused) {
+      video.play().then(() => setPaused(false)).catch(() => setPaused(true))
     } else {
-      video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+      video.pause()
+      setPaused(true)
     }
   }
 
@@ -96,42 +111,14 @@ function LoopCard({ loopData }) {
 
   const handleTimeUpdate = () => {
     const video = videoTag.current
-    // while scrubbing the bar follows the pointer, not the (lagging) video clock
-    if (!video || !video.duration || seeking) return
+    if (!video || !video.duration) return
     setProgress((video.currentTime / video.duration) * 100)
-  }
-
-  const seekTo = (clientX) => {
-    const bar = barRef.current
-    const video = videoTag.current
-    if (!bar || !video || !video.duration) return
-    const rect = bar.getBoundingClientRect()
-    const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1)
-    video.currentTime = ratio * video.duration
-    setProgress(ratio * 100)
-  }
-
-  // pointer capture so a drag that wanders off the thin bar keeps scrubbing
-  const handleSeekStart = (e) => {
-    setSeeking(true)
-    e.currentTarget.setPointerCapture(e.pointerId)
-    seekTo(e.clientX)
-  }
-
-  const handleSeekMove = (e) => {
-    if (seeking) seekTo(e.clientX)
-  }
-
-  const handleSeekEnd = (e) => {
-    if (!seeking) return
-    e.currentTarget.releasePointerCapture(e.pointerId)
-    setSeeking(false)
   }
 
   const handleError = () => {
     console.error("loop video failed to load:", loopData.media, videoTag.current?.error)
     setFailed(true)
-    setIsPlaying(false)
+    setPaused(true)
   }
 
   const handleLike = async () => {
@@ -170,104 +157,117 @@ function LoopCard({ loopData }) {
   }
 
   return (
-    <div ref={cardRef} className='relative flex h-dvh w-full shrink-0 snap-start items-center justify-center overflow-hidden bg-foreground lg:w-[420px]'>
-
+    <article
+      ref={cardRef}
+      className='relative h-full w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-border/80 bg-card shadow-[0_24px_60px_-40px_var(--shadow-color)]'
+    >
       <video
         ref={videoTag}
         src={loopData.media}
         poster={posterFor(loopData.media)}
         loop
-        muted={mute}
+        muted={muted}
         playsInline
         preload='metadata'
         className='size-full object-cover'
         onClick={handleClick}
         onError={handleError}
         onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={(e) => setLength(duration(e.currentTarget.duration))}
       />
 
-      {/* keeps the white chrome legible over a bright frame */}
-      <div className='pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-foreground/70 to-transparent' />
+      <div className='pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-4'>
+        <span className='pointer-events-auto rounded-full bg-foreground/45 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-background backdrop-blur'>
+          Loop{length ? ` · ${length}` : ""}
+        </span>
+        <button
+          type='button'
+          className='pointer-events-auto grid size-9 place-items-center rounded-full bg-foreground/45 text-background backdrop-blur'
+          aria-label={muted ? "Unmute" : "Mute"}
+          onClick={onToggleMute}
+        >
+          {muted ? <IoMdVolumeOff className='size-4' /> : <IoMdVolumeHigh className='size-4' />}
+        </button>
+      </div>
 
       {failed &&
         <div className='absolute inset-0 grid place-items-center bg-foreground/80 text-sm text-background'>
           Video could not be loaded
         </div>}
 
+      {paused && !failed &&
+        <div className='pointer-events-none absolute inset-0 grid place-items-center'>
+          <span className='grid size-16 place-items-center rounded-full bg-foreground/40 text-background backdrop-blur'>
+            <FiPlay className='size-7 fill-current' />
+          </span>
+        </div>}
+
       {burst > 0 &&
-        <div key={burst} className='like-burst pointer-events-none absolute inset-0 z-10 grid place-items-center'>
+        <div key={burst} className='like-burst pointer-events-none absolute inset-0 grid place-items-center'>
           <GoHeartFill className='size-24 text-background drop-shadow-lg' />
         </div>}
 
-      {/* right action rail */}
-      <div className='absolute bottom-32 right-3 z-10 flex flex-col items-center gap-6'>
-        <button className='flex flex-col items-center gap-1' onClick={handleLike}>
-          {liked
-            ? <GoHeartFill className='size-7 text-notification' />
-            : <GoHeart className='size-7 text-background' />}
-          <span className='text-[11px] font-semibold text-background'>{loopData.likes?.length || 0}</span>
-        </button>
-
-        <button className='flex flex-col items-center gap-1' onClick={() => setShowComment(true)}>
-          <MdOutlineInsertComment className='size-7 text-background' />
-          <span className='text-[11px] font-semibold text-background'>{loopData.comments?.length || 0}</span>
-        </button>
-
-        <button aria-label='Toggle sound' onClick={() => setMute(prev => !prev)}>
-          {mute
-            ? <IoMdVolumeOff className='size-7 text-background' />
-            : <IoMdVolumeHigh className='size-7 text-background' />}
-        </button>
-      </div>
-
-      {/* author + caption */}
-      <div className='absolute bottom-24 left-0 z-10 flex w-full flex-col gap-2.5 px-4'>
-        <div className='flex items-center gap-2.5'>
-          <div className='size-10 shrink-0 cursor-pointer overflow-hidden rounded-full ring-2 ring-background/70'
-            onClick={() => navigate(`/profile/${loopData.author?.userName}`)}>
-            <img src={loopData.author?.profileImage || dp} className='size-full object-cover' />
+      <div className='pointer-events-none absolute inset-x-0 bottom-0 flex items-end gap-3 bg-gradient-to-t from-foreground/70 via-foreground/25 to-transparent p-4 pt-16'>
+        <div className='pointer-events-auto min-w-0 flex-1 text-background'>
+          <div className='mb-2.5 flex items-center gap-2.5'>
+            <Avatar
+              user={loopData.author}
+              size='size-9'
+              text='text-[10px]'
+              ring='ring-2 ring-background/70'
+              onClick={() => navigate(`/profile/${loopData.author?.userName}`)}
+            />
+            <div className='min-w-0 cursor-pointer' onClick={() => navigate(`/profile/${loopData.author?.userName}`)}>
+              <p className='truncate text-sm font-semibold'>{loopData.author?.name || loopData.author?.userName}</p>
+              <p className='truncate text-[11px] opacity-80'>@{loopData.author?.userName}</p>
+            </div>
+            {!isOwnLoop &&
+              <button
+                className='h-7 shrink-0 rounded-full border border-background/60 bg-transparent px-3 text-[11px] font-semibold text-background transition hover:bg-background/15'
+                onClick={handleFollow}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </button>}
           </div>
-          <span className='min-w-0 truncate text-sm font-semibold text-background'
-            onClick={() => navigate(`/profile/${loopData.author?.userName}`)}>
-            {loopData.author?.userName}
-          </span>
-          {!isOwnLoop &&
-            <button
-              className={`h-7 shrink-0 rounded-full px-3 text-[11px] font-semibold transition ${isFollowing
-                ? "border border-background/60 text-background"
-                : "bg-primary text-primary-foreground hover:opacity-90"}`}
-              onClick={handleFollow}>
-              {isFollowing ? "Following" : "Follow"}
-            </button>}
+
+          {loopData.caption &&
+            <p className='line-clamp-2 text-[13px] leading-5 break-words'>{loopData.caption}</p>}
         </div>
 
-        {loopData.caption &&
-          <p className='pr-14 text-[13px] leading-5 break-words text-background/90'>{loopData.caption}</p>}
-      </div>
+        <div className='pointer-events-auto flex shrink-0 flex-col items-center gap-4 pb-1 text-background'>
+          <RailButton label={liked ? "Unlike" : "Like"} value={loopData.likes?.length || 0} onClick={handleLike}>
+            {liked
+              ? <GoHeartFill className='size-5 text-notification' />
+              : <GoHeart className='size-5' />}
+          </RailButton>
 
-      {/* progress bar — padded wrapper gives the thin track a usable touch target */}
-      <div
-        className='absolute bottom-0 left-0 z-10 w-full cursor-pointer touch-none px-3 py-3'
-        onPointerDown={handleSeekStart}
-        onPointerMove={handleSeekMove}
-        onPointerUp={handleSeekEnd}
-        onPointerCancel={handleSeekEnd}
-      >
-        <div ref={barRef} className={`w-full rounded-full bg-background/30 transition-all duration-150 ${seeking ? "h-1.5" : "h-1"}`}>
-          <div className='h-full rounded-full bg-background' style={{ width: `${progress}%` }}>
-            {seeking &&
-              <div className='float-right -mr-1.5 -mt-0.75 size-3 rounded-full bg-background' />}
-          </div>
+          <RailButton label='Comments' value={loopData.comments?.length || 0} onClick={() => setShowComment(true)}>
+            <MdOutlineInsertComment className='size-5' />
+          </RailButton>
+
+          <RailButton label='Save'>
+            <FiBookmark className='size-5' />
+          </RailButton>
+
+          <RailButton label={paused ? "Play" : "Pause"} onClick={togglePlay}>
+            {paused ? <FiPlay className='size-5' /> : <FiPause className='size-5' />}
+          </RailButton>
         </div>
       </div>
 
-      {/* comment sheet */}
-      <div className={`absolute bottom-0 left-0 z-20 flex h-[55%] w-full flex-col rounded-t-2xl bg-card transition-transform duration-300 ${showComment ? "translate-y-0" : "translate-y-full"}`}>
+      {/* thin progress line along the very bottom of the card */}
+      <div className='pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-background/25'>
+        <div className='h-full bg-background' style={{ width: `${progress}%` }} />
+      </div>
+
+      <div className={`absolute inset-x-0 bottom-0 z-20 flex h-[62%] flex-col rounded-t-2xl bg-card transition-transform duration-300 ${showComment ? "translate-y-0" : "translate-y-full"}`}>
         <div className='flex items-center justify-between border-b border-border/70 px-5 py-3.5'>
           <span className='font-display text-sm font-semibold text-foreground'>Comments ({loopData.comments?.length || 0})</span>
-          <button aria-label='Close'
+          <button
+            aria-label='Close'
             className='grid size-8 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground'
-            onClick={() => setShowComment(false)}>
+            onClick={() => setShowComment(false)}
+          >
             <IoClose className='size-5' />
           </button>
         </div>
@@ -277,9 +277,7 @@ function LoopCard({ loopData }) {
             <p className='pt-4 text-center text-xs text-muted-foreground'>No comments yet</p>}
           {loopData.comments?.map((com, index) =>
             <div key={index} className='flex items-start gap-2.5'>
-              <div className='size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-border'>
-                <img src={com.author?.profileImage || dp} className='size-full object-cover' />
-              </div>
+              <Avatar user={com.author} size='size-8' text='text-[10px]' />
               <p className='min-w-0 text-[13px] leading-5 text-foreground'>
                 <span className='mr-1.5 font-semibold'>{com.author?.userName}</span>
                 {com.message}
@@ -289,25 +287,25 @@ function LoopCard({ loopData }) {
         </div>
 
         <div className='flex items-center gap-2.5 border-t border-border/70 px-5 py-3.5'>
-          <div className='size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-border'>
-            <img src={userData.profileImage || dp} className='size-full object-cover' />
-          </div>
+          <Avatar user={userData} size='size-9' />
           <input
             type='text'
             placeholder='Write a comment...'
-            className='h-9 min-w-0 flex-1 rounded-full bg-muted px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring'
+            className='h-10 min-w-0 flex-1 rounded-full border border-border bg-surface px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10'
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleComment()}
           />
-          <button className='grid size-9 shrink-0 place-items-center rounded-full text-primary transition hover:bg-accent disabled:opacity-40'
-            onClick={handleComment} disabled={!message.trim()}>
+          <button
+            className='grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition hover:opacity-90 disabled:opacity-40'
+            onClick={handleComment} disabled={!message.trim()}
+          >
             <IoSend className='size-4' />
           </button>
         </div>
       </div>
 
-    </div>
+    </article>
   )
 }
 
