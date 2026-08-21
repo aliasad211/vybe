@@ -1,23 +1,25 @@
-import React from 'react'
-import { useState } from 'react';
-import { IoIosArrowRoundBack } from "react-icons/io";
+import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { FiPlusSquare } from "react-icons/fi";
-import { useRef } from 'react';
-import VideoPlayer from '../components/VideoPlayer';
-import axios from "axios";
-import { serverUrl } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
+import { FiArrowLeft, FiImage, FiVideo, FiX } from "react-icons/fi";
+import { ClipLoader } from "react-spinners";
+import axios from "axios";
+import VideoPlayer from '../components/VideoPlayer';
+import Avatar from '../components/Avatar';
+import { serverUrl } from '../App';
 import { setPostData } from '../redux/postSlice';
 import { setUserData } from "../redux/userSlice";
 import { setLoopData } from "../redux/loopSlice";
-import { ClipLoader } from "react-spinners";
 
-const TABS = ["post", "story", "loop"];
+const TABS = [
+  { key: "post", label: "Post", hint: "A photo or a video for your feed" },
+  { key: "story", label: "Story", hint: "Disappears after 24 hours" },
+  { key: "loop", label: "Loop", hint: "Short video only" },
+];
 
 function Upload() {
   const [uploadType, setUploadType] = useState("post");
-  const [fontendMedia, setFrontendMedia] = useState(null);
+  const [frontendMedia, setFrontendMedia] = useState(null);
   const [backendMedia, setBackendMedia] = useState(null);
   const [mediaType, setMediaType] = useState(null);
   const [caption, setCaption] = useState("");
@@ -29,156 +31,189 @@ function Upload() {
   const { loopData } = useSelector(state => state.loop);
   const [loading, setLoading] = useState(false);
 
+  const active = TABS.find(tab => tab.key === uploadType);
+
   const handleMedia = (e) => {
     const file = e.target.files[0]
-
-    if (file.type.includes("image")) {
-      setMediaType("image")
-    } else {
-      setMediaType("video")
-    }
-
+    if (!file) return
+    setMediaType(file.type.includes("image") ? "image" : "video")
     setBackendMedia(file)
     setFrontendMedia(URL.createObjectURL(file))
   }
 
-  const uploadPost = async () => {
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("caption", caption)
-      formData.append("mediaType", mediaType)
-      formData.append("media", backendMedia)
+  const clearMedia = () => {
+    setFrontendMedia(null)
+    setBackendMedia(null)
+    setMediaType(null)
+  }
 
-      const response = await axios.post(`${serverUrl}/api/post/upload`, formData, { withCredentials: true })
-      dispatch(setPostData([response.data, ...postData]));
-      setLoading(false);
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
+  const uploadPost = async () => {
+    const formData = new FormData();
+    formData.append("caption", caption)
+    formData.append("mediaType", mediaType)
+    formData.append("media", backendMedia)
+    const response = await axios.post(`${serverUrl}/api/post/upload`, formData, { withCredentials: true })
+    dispatch(setPostData([response.data, ...postData]));
   }
 
   const uploadStory = async () => {
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("mediaType", mediaType)
-      formData.append("media", backendMedia)
-
-      const response = await axios.post(`${serverUrl}/api/story/upload`, formData, { withCredentials: true })
-      //storyData is the tray of people you follow — your own story lives on userData,
-      //so light the ring there instead of refetching the whole user
-      dispatch(setUserData({ ...userData, story: response.data }));
-      setLoading(false);
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
+    const formData = new FormData();
+    formData.append("mediaType", mediaType)
+    formData.append("media", backendMedia)
+    const response = await axios.post(`${serverUrl}/api/story/upload`, formData, { withCredentials: true })
+    //storyData is the tray of people you follow — your own story lives on userData,
+    //so light the ring there instead of refetching the whole user
+    dispatch(setUserData({ ...userData, story: response.data }));
   }
 
   const uploadLoop = async () => {
+    const formData = new FormData();
+    formData.append("caption", caption)
+    formData.append("media", backendMedia)
+    const response = await axios.post(`${serverUrl}/api/loop/upload`, formData, { withCredentials: true })
+    dispatch(setLoopData([...loopData, response.data]));
+  }
+
+  const handleUpload = async () => {
+    if (!backendMedia) return
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("caption", caption)
-      formData.append("media", backendMedia)
-
-      const response = await axios.post(`${serverUrl}/api/loop/upload`, formData, { withCredentials: true })
-      dispatch(setLoopData([...loopData, response.data]));
-      setLoading(false);
+      if (uploadType === "post") await uploadPost()
+      else if (uploadType === "story") await uploadStory()
+      else await uploadLoop()
       navigate("/");
     } catch (error) {
       console.log(error);
+    } finally {
       setLoading(false);
-    }
-  }
-
-  const handleUpload = () => {
-    if (uploadType == "post") {
-      uploadPost()
-    } else if (uploadType == "story") {
-      uploadStory()
-    } else {
-      uploadLoop()
     }
   }
 
   return (
-    <div className='min-h-screen w-full bg-background'>
+    <div className='min-h-svh bg-background'>
 
-      <header className='sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-border/70 bg-background/90 px-4 backdrop-blur-xl sm:px-6'>
-        <button aria-label='Back'
-          className='grid size-9 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground'
-          onClick={() => navigate("/")}>
-          <IoIosArrowRoundBack className='size-6' />
+      <header className='sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-border/70 bg-background/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8'>
+        <button
+          aria-label='Back to home'
+          className='grid size-9 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground'
+          onClick={() => navigate("/")}
+        >
+          <FiArrowLeft className='size-4' />
         </button>
-        <h1 className='font-display text-xl font-semibold text-foreground'>Create</h1>
+        <div>
+          <p className='eyebrow mb-1'>New</p>
+          <h1 className='font-display text-lg font-semibold tracking-tight text-foreground'>Create</h1>
+        </div>
       </header>
 
-      <div className='mx-auto w-full max-w-[520px] px-4 py-6 sm:px-6'>
+      <main className='mx-auto w-full max-w-lg px-4 py-7 sm:px-6'>
+        <div className='rounded-lg border border-border bg-card p-5 shadow-[0_20px_60px_-45px_var(--shadow-color)] sm:p-6'>
 
-        <div className='flex items-center gap-1.5 rounded-full border border-border/70 bg-card p-1.5'>
-          {TABS.map(tab =>
-            <button
-              key={tab}
-              className={`h-9 flex-1 rounded-full text-xs font-semibold capitalize transition ${uploadType === tab
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"}`}
-              onClick={() => setUploadType(tab)}
-            >
-              {tab}
-            </button>
-          )}
-        </div>
+          <div className='mb-5'>
+            <p className='eyebrow mb-1'>New {active.label.toLowerCase()}</p>
+            <h2 className='font-display text-xl font-semibold text-foreground'>What&rsquo;s on your mind?</h2>
+          </div>
 
-        {!fontendMedia &&
-          <button
-            className='mt-6 flex aspect-[4/5] w-full flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed border-border bg-card transition hover:border-primary hover:bg-accent/40'
-            onClick={() => mediaInput.current.click()}
-          >
-            <input type='file' accept={uploadType == "loop" ? "video/*" : ""} hidden ref={mediaInput} onChange={handleMedia} />
-            <span className='grid size-12 place-items-center rounded-full bg-muted'>
-              <FiPlusSquare className='size-5 text-muted-foreground' />
-            </span>
-            <span className='font-display text-sm font-semibold text-foreground'>Upload {uploadType}</span>
-            <span className='text-[11px] text-muted-foreground'>
-              {uploadType === "loop" ? "Video only" : "Image or video"}
-            </span>
-          </button>}
+          <div className='mb-5 flex gap-1 rounded-full bg-muted p-1'>
+            {TABS.map(tab =>
+              <button
+                key={tab.key}
+                type='button'
+                onClick={() => setUploadType(tab.key)}
+                className={`flex-1 rounded-full py-2 text-xs font-semibold transition ${uploadType === tab.key
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {tab.label}
+              </button>
+            )}
+          </div>
 
-        {fontendMedia &&
-          <div className='mt-6'>
-            <div className='aspect-[4/5] w-full overflow-hidden rounded-2xl border border-border/70 bg-muted'>
-              {mediaType === "image"
-                ? <img src={fontendMedia} className='size-full object-cover' />
-                : <VideoPlayer media={fontendMedia} />}
-            </div>
-
-            {uploadType !== "story" &&
-              <input
-                type='text'
-                className='mt-4 h-12 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring'
-                placeholder='Write a caption...'
-                onChange={(e) => setCaption(e.target.value)}
+          {uploadType !== "story" &&
+            <div className='flex items-start gap-3'>
+              <Avatar user={userData} size='size-10' />
+              <textarea
                 value={caption}
-              />}
+                onChange={(e) => setCaption(e.target.value)}
+                placeholder='Share a thought, a moment, a little beauty...'
+                className='min-h-24 flex-1 resize-none bg-transparent pt-1 text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground'
+              />
+            </div>}
 
-            <div className='mt-5 flex items-center gap-2.5'>
-              <button className='h-12 flex-1 rounded-full border border-border text-sm font-semibold text-foreground transition hover:bg-accent'
-                onClick={() => { setFrontendMedia(null); setBackendMedia(null); setMediaType(null); }}>
-                Change
+          {!frontendMedia
+            ? <button
+              type='button'
+              className='mt-4 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface transition hover:border-primary hover:bg-accent/40'
+              onClick={() => mediaInput.current.click()}
+            >
+              <input
+                type='file'
+                accept={uploadType === "loop" ? "video/*" : "image/*,video/*"}
+                hidden
+                ref={mediaInput}
+                onChange={handleMedia}
+              />
+              <span className='grid size-11 place-items-center rounded-full bg-muted'>
+                {uploadType === "loop"
+                  ? <FiVideo className='size-5 text-muted-foreground' />
+                  : <FiImage className='size-5 text-muted-foreground' />}
+              </span>
+              <span className='font-display text-sm font-semibold text-foreground'>Add {uploadType === "loop" ? "a video" : "media"}</span>
+              <span className='text-[11px] text-muted-foreground'>{active.hint}</span>
+            </button>
+            : <div className='relative mt-4 overflow-hidden rounded-xl border border-border/70 bg-muted'>
+              <button
+                aria-label='Remove media'
+                className='absolute right-2 top-2 z-10 grid size-8 place-items-center rounded-full bg-foreground/45 text-background backdrop-blur transition hover:bg-foreground/60'
+                onClick={clearMedia}
+              >
+                <FiX className='size-4' />
               </button>
-              <button className='grid h-12 flex-1 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60'
-                onClick={handleUpload} disabled={loading}>
-                {loading ? <ClipLoader size={22} color='currentColor' /> : `Share ${uploadType}`}
+              <div className='aspect-square w-full'>
+                {mediaType === "image"
+                  ? <img src={frontendMedia} className='size-full object-cover' />
+                  : <VideoPlayer media={frontendMedia} />}
+              </div>
+            </div>}
+
+          <div className='mt-5 flex items-center justify-between border-t border-border/70 pt-4'>
+            <div className='flex gap-1'>
+              <button
+                aria-label='Add image'
+                className='grid size-9 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-40'
+                onClick={() => mediaInput.current?.click()}
+                disabled={uploadType === "loop"}
+              >
+                <FiImage className='size-4' />
+              </button>
+              <button
+                aria-label='Add video'
+                className='grid size-9 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground'
+                onClick={() => mediaInput.current?.click()}
+              >
+                <FiVideo className='size-4' />
               </button>
             </div>
-          </div>}
 
-      </div>
+            <div className='flex gap-2'>
+              <button
+                className='h-9 rounded-full px-4 text-xs font-semibold text-muted-foreground transition hover:bg-accent hover:text-foreground'
+                onClick={() => navigate("/")}
+              >
+                Cancel
+              </button>
+              <button
+                className='grid h-9 min-w-24 place-items-center rounded-full bg-primary px-5 text-xs font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40'
+                onClick={handleUpload}
+                disabled={loading || !backendMedia}
+              >
+                {loading ? <ClipLoader size={16} color='currentColor' /> : `Share ${active.label.toLowerCase()}`}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </main>
     </div>
   )
 }
